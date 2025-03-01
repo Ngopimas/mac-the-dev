@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sonic the Developer</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        <div id="ui-layer">
+            <div id="start-screen" class="screen">
+                <h1>Sonic the Developer</h1>
+                <p>Race against deadlines, collect coffee, avoid bugs!</p>
+                <button id="start-button">START GAME</button>
+                <button id="instructions-button">HOW TO PLAY</button>
+            </div>
+            <div id="game-over-screen" class="screen hidden">
+                <h2>DEADLINE REACHED!</h2>
+                <p>Your score: <span id="final-score">0</span></p>
+                <p id="restart-hint" class="hint-text">Press SPACE or ENTER to restart</p>
+                <button id="restart-button">TRY AGAIN</button>
+            </div>
+            <div id="instructions-screen" class="screen hidden">
+                <h2>How to Play</h2>
+                <ul>
+                    <li>Click or press Space to jump</li>
+                    <li>Double-click or double-press Space to double jump</li>
+                    <li>Press Down Arrow to slide</li>
+                    <li>Collect coffee for speed boosts</li>
+                    <li>Collect code snippets for points</li>
+                    <li>Avoid bugs and obstacles</li>
+                    <li>Stay ahead of the deadline!</li>
+                </ul>
+
+                <h3>Legend</h3>
+                <div class="legend-container">
+                    <div class="legend-section">
+                        <h4>Collect These:</h4>
+                        <ul class="legend-list">
+                            <li><span class="legend-item coffee"></span> Coffee - Speed boost for 5 seconds</li>
+                            <li><span class="legend-item stackoverflow"></span> Stack Overflow - Temporary invincibility
+                            </li>
+                            <li><span class="legend-item git-commit"></span> Git Commit - Checkpoint</li>
+                            <li><span class="legend-item code-snippet"></span> Code Snippet - Points</li>
+                        </ul>
+                    </div>
+                    <div class="legend-section">
+                        <h4>Avoid These:</h4>
+                        <ul class="legend-list">
+                            <li><span class="legend-item bug"></span> Bug - Crashes your character</li>
+                            <li><span class="legend-item merge-conflict"></span> Merge Conflict - Crashes your character
+                            </li>
+                            <li><span class="legend-item meeting"></span> Meeting - Slows you down</li>
+                            <li><span class="legend-item tech-debt"></span> Technical Debt - Grows and crashes you</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <button id="back-button">BACK</button>
+            </div>
+            <div id="hud" class="hidden">
+                <div id="score-container">Score: <span id="score">0</span></div>
+                <div id="coffee-meter">
+                    <div id="coffee-level"></div>
+                </div>
+                <div id="deadline-indicator">
+                    <div id="deadline-bar"></div>
+                </div>
+            </div>
+
+            <!-- Help button that's always visible during gameplay -->
+            <button id="help-button" class="floating-button hidden">?</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/assets.js"></script>
+    <script src="js/sprites.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/obstacles.js"></script>
+    <script src="js/collectibles.js"></script>
+    <script src="js/level.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
