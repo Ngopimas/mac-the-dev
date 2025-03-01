@@ -1,5 +1,5 @@
 /**
- * UI management for Sonic the Developer game
+ * UI management for Mac the Developer game
  */
 
 class UI {
@@ -32,7 +32,7 @@ class UI {
     // Power-up indicators
     this.powerUpIndicators = {
       coffee: null,
-      stackoverflow: null,
+      stackOverflow: null,
       gitCommit: null,
     };
 
@@ -56,7 +56,13 @@ class UI {
     // Create power-up indicators
     this.createPowerUpIndicators();
 
-    // Add high score element to start screen if it doesn't exist
+    // Get the existing high score element or create a new one
+    this.highScoreElement = document.getElementById("high-score");
+
+    // Update high score display regardless of whether it was created or already existed
+    this.updateHighScore(Utils.getHighScore());
+
+    // Only create a new high score element if it doesn't exist
     if (!this.highScoreElement) {
       const highScoreContainer = document.createElement("div");
       highScoreContainer.className = "high-score-container";
@@ -114,13 +120,13 @@ class UI {
     }
 
     // Create Stack Overflow indicator if it doesn't exist
-    if (!this.powerUpIndicators.stackoverflow) {
+    if (!this.powerUpIndicators.stackOverflow) {
       const soIndicator = document.createElement("div");
-      soIndicator.className = "power-up-indicator stackoverflow hidden";
+      soIndicator.className = "power-up-indicator stackOverflow hidden";
       soIndicator.innerHTML =
         '<span class="icon">🛡️</span><span class="timer"></span>';
       this.powerUpIndicatorsContainer.appendChild(soIndicator);
-      this.powerUpIndicators.stackoverflow = soIndicator;
+      this.powerUpIndicators.stackOverflow = soIndicator;
     }
 
     // Create Git Commit indicator if it doesn't exist
@@ -171,26 +177,28 @@ class UI {
   }
 
   /**
-   * Show a specific screen
-   * @param {string} screenName - Screen to show ('start', 'game', 'gameOver', 'instructions')
+   * Show a specific screen and hide others
+   * @param {string} screenName - Name of screen to show ('start', 'game', 'gameOver', 'instructions')
    */
   showScreen(screenName) {
     // Hide all screens
-    if (this.startScreen) this.startScreen.classList.add("hidden");
-    if (this.gameOverScreen) this.gameOverScreen.classList.add("hidden");
-    if (this.instructionsScreen)
-      this.instructionsScreen.classList.add("hidden");
-    if (this.hud) this.hud.classList.add("hidden");
-    if (this.pauseMessage) this.pauseMessage.classList.add("hidden");
+    this.startScreen.classList.add("hidden");
+    this.gameOverScreen.classList.add("hidden");
 
-    // Hide control buttons by default
-    if (this.helpButton) this.helpButton.classList.add("hidden");
-    if (this.pauseButton) this.pauseButton.classList.add("hidden");
+    if (this.instructionsScreen) {
+      this.instructionsScreen.classList.add("hidden");
+    }
+
+    if (this.hud) {
+      this.hud.classList.add("hidden");
+    }
 
     // Show requested screen
     switch (screenName) {
       case "start":
-        if (this.startScreen) this.startScreen.classList.remove("hidden");
+        this.startScreen.classList.remove("hidden");
+        // Update high score display when showing start screen
+        this.updateHighScore(Utils.getHighScore());
         break;
 
       case "game":
@@ -250,17 +258,17 @@ class UI {
     if (
       gameState.powerUps &&
       gameState.powerUps.invincibility > 0 &&
-      this.powerUpIndicators.stackoverflow
+      this.powerUpIndicators.stackOverflow
     ) {
-      this.powerUpIndicators.stackoverflow.classList.remove("hidden");
+      this.powerUpIndicators.stackOverflow.classList.remove("hidden");
       const timerElement =
-        this.powerUpIndicators.stackoverflow.querySelector(".timer");
+        this.powerUpIndicators.stackOverflow.querySelector(".timer");
       if (timerElement) {
         timerElement.textContent =
           Math.ceil(gameState.powerUps.invincibility / 1000) + "s";
       }
-    } else if (this.powerUpIndicators.stackoverflow) {
-      this.powerUpIndicators.stackoverflow.classList.add("hidden");
+    } else if (this.powerUpIndicators.stackOverflow) {
+      this.powerUpIndicators.stackOverflow.classList.add("hidden");
     }
 
     // Update Git Commit indicator
@@ -323,7 +331,7 @@ class UI {
       }
     }
 
-    // Update high score
+    // Update high score on all screens
     this.updateHighScore(highScore);
 
     // Show game over screen

@@ -1,5 +1,5 @@
 /**
- * Asset management for Sonic the Developer game
+ * Asset management for Mac the Developer game
  */
 
 const Assets = {

@@ -1,5 +1,5 @@
 /**
- * Main game logic for Sonic the Developer game
+ * Main game logic for Mac the Developer game
  */
 
 class Game {
@@ -147,7 +147,51 @@ class Game {
     this.canvas.addEventListener("mousedown", (e) => {
       if (!this.state.isRunning || this.state.isPaused) return;
       e.preventDefault(); // Prevent default behavior
-      this.handleJump();
+
+      // Get mouse position
+      const rect = this.canvas.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+
+      // If click is in bottom third of screen, slide; otherwise jump
+      if (y > this.canvas.height * 0.7) {
+        this.input.isSlidePressed = true;
+        if (this.player) this.player.slide();
+      } else {
+        this.handleJump();
+      }
+    });
+
+    // Add mouseup event to end sliding
+    this.canvas.addEventListener("mouseup", (e) => {
+      if (!this.state.isRunning || this.state.isPaused) return;
+      e.preventDefault(); // Prevent default behavior
+
+      // End slide if sliding
+      if (this.input.isSlidePressed) {
+        this.input.isSlidePressed = false;
+        if (this.player) this.player.endSlide();
+      }
+    });
+
+    // Add mousemove event to handle sliding when mouse moves to bottom of screen while pressed
+    this.canvas.addEventListener("mousemove", (e) => {
+      if (!this.state.isRunning || this.state.isPaused) return;
+      if (e.buttons !== 1) return; // Only process if mouse button is pressed
+
+      // Get mouse position
+      const rect = this.canvas.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+
+      // If mouse is in bottom third of screen and not already sliding, start sliding
+      if (y > this.canvas.height * 0.7 && !this.input.isSlidePressed) {
+        this.input.isSlidePressed = true;
+        if (this.player) this.player.slide();
+      }
+      // If mouse is not in bottom third and is sliding, end sliding
+      else if (y <= this.canvas.height * 0.7 && this.input.isSlidePressed) {
+        this.input.isSlidePressed = false;
+        if (this.player) this.player.endSlide();
+      }
     });
 
     this.canvas.addEventListener(
@@ -283,6 +327,15 @@ class Game {
       gitCommits: 0,
     };
 
+    // Make sure high score is up to date
+    this.state.highScore = Utils.getHighScore();
+
+    // Add playing class to game container for mouse zone indicators
+    const gameContainer = document.getElementById("game-container");
+    if (gameContainer) {
+      gameContainer.classList.add("playing");
+    }
+
     // Create player
     this.player = new Player({
       groundY: this.canvas.height - 50,
@@ -388,13 +441,22 @@ class Game {
     this.state.isRunning = false;
     this.state.isGameOver = true;
 
+    // Remove playing class from game container
+    const gameContainer = document.getElementById("game-container");
+    if (gameContainer) {
+      gameContainer.classList.remove("playing");
+    }
+
     // Check for high score
     const isNewHighScore = Utils.setHighScore(this.state.score);
+
+    // Update the game state with the latest high score
+    this.state.highScore = Utils.getHighScore();
 
     // Show game over screen
     this.ui.showGameOver(
       this.state.score,
-      Utils.getHighScore(),
+      this.state.highScore,
       isNewHighScore
     );
 
@@ -484,7 +546,7 @@ class Game {
   updatePowerUps(deltaTime) {
     // Update coffee boost
     if (this.player.state.hasSpeedBoost) {
-      this.state.coffeeBoost = (this.player.speedBoostDuration / 5000) * 100;
+      this.state.coffeeBoost = (this.player.speedBoostDuration / 12000) * 100;
       this.state.powerUps.coffee = this.player.speedBoostDuration;
     } else {
       this.state.coffeeBoost = 0;

@@ -1,5 +1,5 @@
 /**
- * Sprite management for Sonic the Developer game
+ * Sprite management for Mac the Developer game
  */
 
 class Sprite {

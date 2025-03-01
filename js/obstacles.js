@@ -1,5 +1,5 @@
 /**
- * Obstacles for Sonic the Developer game
+ * Obstacles for Mac the Developer game
  */
 
 class Obstacle extends Sprite {
@@ -62,6 +62,9 @@ class Obstacle extends Sprite {
 
     // Special properties for different obstacle types
     this.setupSpecialProperties();
+
+    // Set emoji based on obstacle type
+    this.emoji = this.getObstacleEmoji();
   }
 
   /**
@@ -153,10 +156,21 @@ class Obstacle extends Sprite {
   applyEffect(player) {
     switch (this.type) {
       case "bug":
-      case "mergeConflict":
       case "technicalDebt":
         // These obstacles crash the player
         player.crash();
+        break;
+
+      case "mergeConflict":
+        // Merge conflicts now slow down the player (more than meetings)
+        if (!player.invincible) {
+          player.speedBoost = -150; // Stronger negative boost = more slowdown
+          player.state.hasSpeedBoost = true;
+          player.speedBoostDuration = 3000; // 3 seconds of slowdown
+
+          // Make the merge conflict disappear
+          this.isActive = false;
+        }
         break;
 
       case "meeting":
@@ -174,6 +188,25 @@ class Obstacle extends Sprite {
   }
 
   /**
+   * Get the emoji for this obstacle type
+   * @returns {string} - Emoji character
+   */
+  getObstacleEmoji() {
+    switch (this.type) {
+      case "bug":
+        return "🐛";
+      case "mergeConflict":
+        return "⚠️";
+      case "meeting":
+        return "👥";
+      case "technicalDebt":
+        return "🧶";
+      default:
+        return "❓";
+    }
+  }
+
+  /**
    * Draw the obstacle with special effects
    * @param {CanvasRenderingContext2D} ctx - Canvas context
    */
@@ -182,6 +215,12 @@ class Obstacle extends Sprite {
 
     // Draw the obstacle
     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+
+    // Draw emoji on top of the obstacle
+    ctx.font = `${Math.min(this.width, this.height) * 0.6}px Arial`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(this.emoji, this.x + this.width / 2, this.y + this.height / 2);
 
     // Debug: draw collision box
     if (window.DEBUG_MODE) {

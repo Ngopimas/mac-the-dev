@@ -1,5 +1,5 @@
 /**
- * Player character for Sonic the Developer game
+ * Player character for Mac the Developer game
  */
 
 class Player extends Sprite {
@@ -308,7 +308,7 @@ class Player extends Sprite {
     this.score += 50;
     this.state.hasSpeedBoost = true;
     this.speedBoost = 300;
-    this.speedBoostDuration = 8000;
+    this.speedBoostDuration = 12000; // Increased from 8000 to 12000 (12 seconds)
     if (Assets.playSfx) {
       Assets.playSfx("collect");
     }

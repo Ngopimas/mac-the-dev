@@ -1,5 +1,5 @@
 /**
- * Collectibles for Sonic the Developer game
+ * Collectibles for Mac the Developer game
  */
 
 class Collectible extends Sprite {
@@ -51,6 +51,7 @@ class Collectible extends Sprite {
 
     this.type = type;
     this.velocityX = -(options.speed || 300);
+    // this.isVisible = true;
 
     // Adjust collision box to be slightly smaller than sprite
     this.collisionBox = {
@@ -62,6 +63,9 @@ class Collectible extends Sprite {
 
     // Special properties for different collectible types
     this.setupSpecialProperties();
+
+    // Set emoji based on collectible type
+    this.emoji = this.getCollectibleEmoji();
   }
 
   /**
@@ -91,10 +95,8 @@ class Collectible extends Sprite {
         break;
 
       case "codeSnippet":
-        // Code snippets sparkle
-        this.sparkleTimer = 0;
-        this.sparkleInterval = 500;
-        this.isSparkle = false;
+        // Code snippets no longer sparkle
+        // No special properties needed
         break;
     }
   }
@@ -133,13 +135,8 @@ class Collectible extends Sprite {
         break;
 
       case "codeSnippet":
-        // Sparkle effect (toggle visibility briefly)
-        this.sparkleTimer += deltaTime;
-        if (this.sparkleTimer >= this.sparkleInterval) {
-          this.isSparkle = !this.isSparkle;
-          this.sparkleTimer = 0;
-          this.isVisible = !this.isSparkle || Math.random() > 0.5;
-        }
+        // No sparkle effect - codeSnippet remains fully visible at all times
+        this.isVisible = true;
         break;
     }
 
@@ -187,6 +184,25 @@ class Collectible extends Sprite {
   }
 
   /**
+   * Get the emoji for this collectible type
+   * @returns {string} - Emoji character
+   */
+  getCollectibleEmoji() {
+    switch (this.type) {
+      case "coffee":
+        return "☕";
+      case "stackOverflow":
+        return "🛡️";
+      case "gitCommit":
+        return "📌";
+      case "codeSnippet":
+        return "💻";
+      default:
+        return "❓";
+    }
+  }
+
+  /**
    * Draw the collectible with special effects
    * @param {CanvasRenderingContext2D} ctx - Canvas context
    */
@@ -194,6 +210,11 @@ class Collectible extends Sprite {
     if (!this.isVisible) return;
 
     ctx.save();
+
+    // Remove opacity effect for codeSnippet
+    // if (this.type === "codeSnippet" && this.opacity !== undefined) {
+    //   ctx.globalAlpha = this.opacity;
+    // }
 
     // Apply rotation for git commits
     if (this.type === "gitCommit" && this.rotation) {
@@ -206,9 +227,25 @@ class Collectible extends Sprite {
         this.width,
         this.height
       );
+
+      // Draw emoji with rotation
+      ctx.font = `${Math.min(this.width, this.height) * 0.6}px Arial`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(this.emoji, 0, 0);
     } else {
       // Normal drawing for other collectibles
       ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+
+      // Draw emoji on top of the collectible
+      ctx.font = `${Math.min(this.width, this.height) * 0.6}px Arial`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(
+        this.emoji,
+        this.x + this.width / 2,
+        this.y + this.height / 2
+      );
     }
 
     ctx.restore();

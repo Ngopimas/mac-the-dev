@@ -1,5 +1,5 @@
 /**
- * Level management for Sonic the Developer game
+ * Level management for Mac the Developer game
  */
 
 class Level {
@@ -308,13 +308,13 @@ class Level {
         type = "coffee";
       } else if (roll < 0.65) {
         // 20% chance for stack overflow
-        type = "stackoverflow";
+        type = "stackOverflow";
       } else if (roll < 0.8) {
         // 15% chance for git commit
-        type = "gitcommit";
+        type = "gitCommit";
       } else {
         // 20% chance for code snippet
-        type = "code";
+        type = "codeSnippet";
       }
 
       // Create collectible
@@ -339,7 +339,7 @@ class Level {
         // Row of code snippets
         for (let i = 0; i < 5; i++) {
           const collectible = CollectibleFactory.create(
-            "code",
+            "codeSnippet",
             this.width,
             this.groundY - 100
           );
@@ -352,7 +352,7 @@ class Level {
         // Arc of code snippets
         for (let i = 0; i < 5; i++) {
           const collectible = CollectibleFactory.create(
-            "code",
+            "codeSnippet",
             this.width,
             this.groundY - 100 - Math.sin((i / 4) * Math.PI) * 80
           );
@@ -365,7 +365,7 @@ class Level {
         // Coffee with code snippets leading to it
         for (let i = 0; i < 3; i++) {
           const collectible = CollectibleFactory.create(
-            "code",
+            "codeSnippet",
             this.width,
             this.groundY - 100
           );
@@ -474,7 +474,7 @@ class Level {
   }
 
   /**
-   * Update deadline position
+   * Update deadline position and check if it caught up with player
    * @param {number} deltaTime - Time since last update in ms
    * @param {Player} player - Player object
    * @returns {boolean} - True if deadline caught up with player
@@ -496,6 +496,11 @@ class Level {
       // If player is boosted, deadline falls behind
       deadlineSpeedMultiplier =
         (baseSpeed / playerSpeed) * this.difficulty * 0.7; // Added 0.7 multiplier to slow down deadline
+
+      // If player has coffee boost, slow down the deadline significantly
+      if (player.state.hasSpeedBoost) {
+        deadlineSpeedMultiplier *= 0.3; // Reduce deadline speed by 70% when coffee is active
+      }
 
       // Ensure deadline always moves at least a little bit
       deadlineSpeedMultiplier = Math.max(0.05, deadlineSpeedMultiplier); // Reduced from 0.1 to 0.05

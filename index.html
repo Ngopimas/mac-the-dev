@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonic the Developer</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Mac the Developer</title>
+    <link rel="stylesheet" href="./css/style.css">
 </head>
 
 <body>
@@ -16,9 +16,13 @@
         <div id="mobile-jump" class="mobile-control"></div>
         <div id="mobile-slide" class="mobile-control"></div>
 
+        <!-- Mouse control zone indicators -->
+        <div id="jump-zone" class="mouse-zone-indicator">JUMP ZONE</div>
+        <div id="slide-zone" class="mouse-zone-indicator">SLIDE ZONE</div>
+
         <div id="ui-layer">
             <div id="start-screen" class="screen">
-                <h1>Sonic the Developer</h1>
+                <h1>Mac the Developer</h1>
                 <p>Race against deadlines, collect coffee, avoid bugs!</p>
                 <div class="high-score-container">High Score: <span id="high-score">0</span></div>
                 <button id="start-button" class="button">START GAME</button>
@@ -39,25 +43,27 @@
                     <li>Click or press Space to jump</li>
                     <li>Double-click or double-press Space to double jump</li>
                     <li>Press Down Arrow to slide</li>
-                    <li>Collect coffee for speed boosts</li>
+                    <li>Click in the bottom third of the screen to slide</li>
+                    <li>Hold and drag your mouse to control jumping and sliding</li>
+                    <li>Collect coffee for speed boosts and to slow down the deadline</li>
                     <li>Collect code snippets for points</li>
                     <li>Avoid bugs and obstacles</li>
                     <li>Stay ahead of the deadline!</li>
                 </ul>
 
-                <h2>Power-ups</h2>
+                <h2>Collectibles (Circular Items)</h2>
                 <ul>
-                    <li><span class="icon">☕</span> Coffee - Speed boost for 5 seconds</li>
+                    <li><span class="icon">☕</span> Coffee - A boost for the project</li>
                     <li><span class="icon">🛡️</span> Stack Overflow - Temporary invincibility</li>
-                    <li><span class="icon">📌</span> Git Commit - Extra life when you hit an obstacle</li>
                     <li><span class="icon">💻</span> Code Snippet - Extra points</li>
+                    <li><span class="icon">📌</span> Git Commit - Extra points</li>
                 </ul>
 
-                <h2>Obstacles</h2>
+                <h2>Obstacles (Rectangular Items)</h2>
                 <ul>
-                    <li><span class="icon">🐛</span> Bug - Crashes your character</li>
-                    <li><span class="icon">⚠️</span> Merge Conflict - Crashes your character</li>
                     <li><span class="icon">👥</span> Meeting - Slows you down</li>
+                    <li><span class="icon">⚠️</span> Merge Conflict - Slows you down</li>
+                    <li><span class="icon">🐛</span> Bug - Crashes your character</li>
                     <li><span class="icon">🧶</span> Technical Debt - Grows and crashes you</li>
                 </ul>
 
@@ -95,16 +101,16 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/utils.js"></script>
-    <script src="js/assets.js"></script>
-    <script src="js/sprites.js"></script>
-    <script src="js/player.js"></script>
-    <script src="js/obstacles.js"></script>
-    <script src="js/collectibles.js"></script>
-    <script src="js/level.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/game.js"></script>
-    <script src="js/main.js"></script>
+    <script src="./js/utils.js"></script>
+    <script src="./js/assets.js"></script>
+    <script src="./js/sprites.js"></script>
+    <script src="./js/player.js"></script>
+    <script src="./js/obstacles.js"></script>
+    <script src="./js/collectibles.js"></script>
+    <script src="./js/level.js"></script>
+    <script src="./js/ui.js"></script>
+    <script src="./js/game.js"></script>
+    <script src="./js/main.js"></script>
 </body>
 
 </html>

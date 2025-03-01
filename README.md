@@ -1,6 +1,6 @@
-# Sonic the Developer
+# Mac the Developer
 
-A browser-based endless runner game that reimagines the classic Sonic gameplay within a software development theme. Players control a developer character racing against deadlines while collecting coffee cups for speed boosts and avoiding bugs and technical obstacles.
+A browser-based endless runner game that reimagines the classic Mac gameplay within a software development theme. Players control a developer character racing against deadlines while collecting coffee cups for speed boosts and avoiding bugs and technical obstacles.
 
 ## Play the Game
 
@@ -13,7 +13,8 @@ A browser-based endless runner game that reimagines the classic Sonic gameplay w
 
 - **Jump**: Click, tap, Space bar, or Up arrow
 - **Double Jump**: Double-click, double-tap, or press Space/Up twice quickly
-- **Slide**: Press Down arrow or tap the bottom part of the screen on mobile
+- **Slide**: Press Down arrow, click in the bottom third of the screen, or tap the bottom part of the screen on mobile
+- **Mouse Control**: Click and hold in the bottom third of the screen to slide, upper part to jump
 - **Pause**: Press P or Escape key
 - **Help**: Click the "?" button in the top-right corner or press H key
 - **Restart**: Press Space or Enter key when game over, or click the "TRY AGAIN" button
@@ -22,21 +23,21 @@ A browser-based endless runner game that reimagines the classic Sonic gameplay w
 
 - Endless runner gameplay with increasing difficulty
 - Software development themed obstacles and collectibles
-- Speed boosts from coffee
+- Speed boosts from coffee that also slow down the deadline
 - Invincibility from Stack Overflow answers
 - Checkpoints from Git commits
 - Points from code snippets
 - Deadline mechanic that approaches if you slow down
 - Always-available help button that pauses the game
 - Quick restart with keyboard after game over
-- Beginner-friendly first 10 seconds with reduced difficulty
+- Beginner-friendly first 15 seconds with reduced difficulty
 - Visual distinction between collectibles (circles) and obstacles (rectangles)
 
 ## Game Elements
 
 ### Collectibles (Collect These - Circular Shapes)
 
-- **Coffee Cups** (Brown Circle): Provide speed boost for 5 seconds
+- **Coffee Cups** (Brown Circle): Provide speed boost for 12 seconds and slow down the deadline
 - **Stack Overflow Answers** (Orange Circle): Grant temporary invincibility
 - **Git Commits** (Green Circle): Serve as checkpoints if player dies
 - **Code Snippets** (White Circle): Basic scoring item
@@ -50,10 +51,11 @@ A browser-based endless runner game that reimagines the classic Sonic gameplay w
 
 ## Gameplay Tips
 
-- The game starts with a 10-second grace period where obstacles are fewer and the deadline moves very slowly
+- The game starts with a 15-second grace period where obstacles are fewer and the deadline moves very slowly
 - After the initial grace period, difficulty gradually increases
 - Circular objects are always beneficial - collect them!
 - Rectangular objects with warning stripes are harmful - avoid them!
+- Coffee is especially valuable as it both speeds you up AND slows down the deadline
 
 ## Technical Details
 

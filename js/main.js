@@ -1,5 +1,5 @@
 /**
- * Main entry point for Sonic the Developer game
+ * Main entry point for Mac the Developer game
  */
 
 // Wait for DOM to be fully loaded

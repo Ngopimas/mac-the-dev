@@ -165,7 +165,7 @@ body {
 
 /* Collectible Icons (Circular) */
 .legend-item.coffee,
-.legend-item.stackoverflow,
+.legend-item.stackOverflow,
 .legend-item.git-commit,
 .legend-item.code-snippet {
   border-radius: 50%;
@@ -176,7 +176,7 @@ body {
   background-color: #8b4513;
 }
 
-.legend-item.stackoverflow {
+.legend-item.stackOverflow {
   background-color: #f48024;
 }
 
@@ -454,7 +454,7 @@ button:active {
   background-color: rgba(139, 69, 19, 0.7);
 }
 
-.power-up-indicator.stackoverflow {
+.power-up-indicator.stackOverflow {
   background-color: rgba(244, 128, 36, 0.7);
 }
 
@@ -555,20 +555,64 @@ button:active {
 /* Mobile controls */
 .mobile-control {
   position: absolute;
-  width: 50%;
-  height: 100%;
-  top: 0;
+  width: 100%;
   z-index: 5;
   opacity: 0;
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 #mobile-jump {
-  left: 0;
+  top: 0;
+  height: 70%;
 }
 
 #mobile-slide {
-  right: 0;
+  bottom: 0;
+  height: 30%;
+}
+
+/* Mouse control zone indicators */
+.mouse-zone-indicator {
+  position: absolute;
+  width: 100%;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  text-align: center;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.7);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+#jump-zone {
+  top: 0;
+  height: 70%;
+  background: linear-gradient(to bottom, rgba(0, 255, 255, 0.1), transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#slide-zone {
+  bottom: 0;
+  height: 30%;
+  background: linear-gradient(to top, rgba(255, 165, 0, 0.1), transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#game-container:hover .mouse-zone-indicator {
+  opacity: 0.7;
+}
+
+#game-container.playing:hover .mouse-zone-indicator {
+  opacity: 0.3;
+}
+
+#game-container.playing .mouse-zone-indicator {
+  opacity: 0;
 }
 
 /* Responsive design */

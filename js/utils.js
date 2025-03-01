@@ -1,5 +1,5 @@
 /**
- * Utility functions for Sonic the Developer game
+ * Utility functions for Mac the Developer game
  */
 
 class Utils {
@@ -8,7 +8,7 @@ class Utils {
    * @returns {number} High score
    */
   static getHighScore() {
-    const highScore = localStorage.getItem("sonicDevHighScore");
+    const highScore = localStorage.getItem("MacDevHighScore");
     return highScore ? parseInt(highScore, 10) : 0;
   }
 
@@ -19,7 +19,7 @@ class Utils {
   static setHighScore(score) {
     const currentHighScore = this.getHighScore();
     if (score > currentHighScore) {
-      localStorage.setItem("sonicDevHighScore", score.toString());
+      localStorage.setItem("MacDevHighScore", score.toString());
       return true;
     }
     return false;
