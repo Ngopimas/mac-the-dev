@@ -62,20 +62,10 @@ A browser-based endless runner game that reimagines the classic Sonic gameplay w
 - Responsive design works on both desktop and mobile devices
 - Local storage for saving high scores
 
-## Development
-
-This game was built as an MVP based on the product requirements document. Future enhancements could include:
-
-- Additional character customization
-- More environment themes
-- Sound effects and music
-- Online leaderboards
-- Progressive Web App implementation
-
 ## License
 
 This project is open source and available under the MIT License.
 
 ## Credits
 
-Created by [Your Name] as a fun project for developers who need a quick break from coding!
+Created as a fun little project for developers who need a quick break from coding!

@@ -11,19 +11,28 @@
 <body>
     <div id="game-container">
         <canvas id="game-canvas"></canvas>
+
+        <!-- Mobile controls overlay -->
+        <div id="mobile-jump" class="mobile-control"></div>
+        <div id="mobile-slide" class="mobile-control"></div>
+
         <div id="ui-layer">
             <div id="start-screen" class="screen">
                 <h1>Sonic the Developer</h1>
                 <p>Race against deadlines, collect coffee, avoid bugs!</p>
-                <button id="start-button">START GAME</button>
-                <button id="instructions-button">HOW TO PLAY</button>
+                <div class="high-score-container">High Score: <span id="high-score">0</span></div>
+                <button id="start-button" class="button">START GAME</button>
+                <button id="instructions-button" class="button">HOW TO PLAY</button>
             </div>
+
             <div id="game-over-screen" class="screen hidden">
                 <h2>DEADLINE REACHED!</h2>
                 <p>Your score: <span id="final-score">0</span></p>
-                <p id="restart-hint" class="hint-text">Press SPACE or ENTER to restart</p>
-                <button id="restart-button">TRY AGAIN</button>
+                <p id="new-high-score" class="new-high-score hidden">NEW HIGH SCORE!</p>
+                <p id="restart-hint" class="hint-text hidden">Press SPACE or ENTER to restart</p>
+                <button id="restart-button" class="button">TRY AGAIN</button>
             </div>
+
             <div id="instructions-screen" class="screen hidden">
                 <h2>How to Play</h2>
                 <ul>
@@ -36,44 +45,52 @@
                     <li>Stay ahead of the deadline!</li>
                 </ul>
 
-                <h3>Legend</h3>
-                <div class="legend-container">
-                    <div class="legend-section">
-                        <h4>Collect These:</h4>
-                        <ul class="legend-list">
-                            <li><span class="legend-item coffee"></span> Coffee - Speed boost for 5 seconds</li>
-                            <li><span class="legend-item stackoverflow"></span> Stack Overflow - Temporary invincibility
-                            </li>
-                            <li><span class="legend-item git-commit"></span> Git Commit - Checkpoint</li>
-                            <li><span class="legend-item code-snippet"></span> Code Snippet - Points</li>
-                        </ul>
-                    </div>
-                    <div class="legend-section">
-                        <h4>Avoid These:</h4>
-                        <ul class="legend-list">
-                            <li><span class="legend-item bug"></span> Bug - Crashes your character</li>
-                            <li><span class="legend-item merge-conflict"></span> Merge Conflict - Crashes your character
-                            </li>
-                            <li><span class="legend-item meeting"></span> Meeting - Slows you down</li>
-                            <li><span class="legend-item tech-debt"></span> Technical Debt - Grows and crashes you</li>
-                        </ul>
-                    </div>
-                </div>
+                <h2>Power-ups</h2>
+                <ul>
+                    <li><span class="icon">☕</span> Coffee - Speed boost for 5 seconds</li>
+                    <li><span class="icon">🛡️</span> Stack Overflow - Temporary invincibility</li>
+                    <li><span class="icon">📌</span> Git Commit - Extra life when you hit an obstacle</li>
+                    <li><span class="icon">💻</span> Code Snippet - Extra points</li>
+                </ul>
 
-                <button id="back-button">BACK</button>
+                <h2>Obstacles</h2>
+                <ul>
+                    <li><span class="icon">🐛</span> Bug - Crashes your character</li>
+                    <li><span class="icon">⚠️</span> Merge Conflict - Crashes your character</li>
+                    <li><span class="icon">👥</span> Meeting - Slows you down</li>
+                    <li><span class="icon">🧶</span> Technical Debt - Grows and crashes you</li>
+                </ul>
+
+                <button id="back-button" class="button">BACK</button>
             </div>
+
             <div id="hud" class="hidden">
                 <div id="score-container">Score: <span id="score">0</span></div>
-                <div id="coffee-meter">
-                    <div id="coffee-level"></div>
+
+                <div id="coffee-container">
+                    <div id="coffee-label">Coffee Boost</div>
+                    <div id="coffee-meter">
+                        <div id="coffee-level"></div>
+                    </div>
                 </div>
-                <div id="deadline-indicator">
+
+                <div id="deadline-container">
                     <div id="deadline-bar"></div>
                 </div>
+
+                <!-- Power-up indicators will be created dynamically in UI.js -->
+                <div id="power-up-indicators"></div>
             </div>
 
-            <!-- Help button that's always visible during gameplay -->
-            <button id="help-button" class="floating-button hidden">?</button>
+            <!-- Pause message -->
+            <div id="pause-message" class="hidden">
+                PAUSED
+                <p>Press P or click the pause button to resume</p>
+            </div>
+
+            <!-- Control buttons -->
+            <button id="help-button" class="hidden">?</button>
+            <button id="pause-button" class="hidden">⏸️</button>
         </div>
     </div>
 

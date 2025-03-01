@@ -20,6 +20,14 @@ class Game {
       isPaused: false,
       isGameOver: false,
       score: 0,
+      highScore: Utils.getHighScore() || 0,
+      coffeeBoost: 0,
+      deadlineProximity: 0,
+      powerUps: {
+        coffee: 0,
+        invincibility: 0,
+        gitCommits: 0,
+      },
     };
 
     // Game objects
@@ -35,11 +43,14 @@ class Game {
       isSlidePressed: false,
       jumpTimer: 0,
       lastJumpTime: 0,
+      touchStartY: 0,
     };
 
     // Game loop variables
     this.lastFrameTime = 0;
     this.animationFrameId = null;
+    this.accumulatedTime = 0;
+    this.timeStep = 1000 / 60; // Target 60 FPS
 
     // Initialize game
     this.initialize();
@@ -49,23 +60,33 @@ class Game {
    * Initialize game
    */
   async initialize() {
-    // Load assets
-    await Assets.loadAll();
+    try {
+      // Load assets
+      await Assets.loadAll();
 
-    // Set up event listeners
-    this.setupEventListeners();
+      // Set up event listeners
+      this.setupEventListeners();
 
-    // Set up UI buttons
-    this.ui.setupButtons({
-      onStart: () => this.startGame(),
-      onRestart: () => this.restartGame(),
-    });
+      // Set up UI buttons
+      this.ui.setupButtons({
+        onStart: () => this.startGame(),
+        onRestart: () => this.restartGame(),
+      });
 
-    // Handle window resize
-    window.addEventListener("resize", () => this.resizeCanvas());
+      // Handle window resize
+      window.addEventListener("resize", () => this.resizeCanvas());
 
-    // Debug mode (for development)
-    window.DEBUG_MODE = false;
+      // Debug mode (for development)
+      window.DEBUG_MODE = false;
+
+      console.log("Game initialized successfully");
+    } catch (error) {
+      console.error("Error initializing game:", error);
+      // Display error message to user
+      alert(
+        "There was an error loading the game. Please refresh the page and try again."
+      );
+    }
   }
 
   /**
@@ -124,7 +145,7 @@ class Game {
 
     // Mouse/touch events
     this.canvas.addEventListener("mousedown", (e) => {
-      if (!this.state.isRunning) return;
+      if (!this.state.isRunning || this.state.isPaused) return;
       e.preventDefault(); // Prevent default behavior
       this.handleJump();
     });
@@ -132,13 +153,16 @@ class Game {
     this.canvas.addEventListener(
       "touchstart",
       (e) => {
-        if (!this.state.isRunning) return;
+        if (!this.state.isRunning || this.state.isPaused) return;
         e.preventDefault(); // Prevent default behavior
 
         // Get touch position
         const touch = e.touches[0];
         const rect = this.canvas.getBoundingClientRect();
         const y = touch.clientY - rect.top;
+
+        // Store touch start position for swipe detection
+        this.input.touchStartY = y;
 
         // If touch is in bottom third of screen, slide; otherwise jump
         if (y > this.canvas.height * 0.7) {
@@ -152,9 +176,33 @@ class Game {
     );
 
     this.canvas.addEventListener(
+      "touchmove",
+      (e) => {
+        if (!this.state.isRunning || this.state.isPaused) return;
+        e.preventDefault(); // Prevent default behavior
+
+        // Get current touch position
+        const touch = e.touches[0];
+        const rect = this.canvas.getBoundingClientRect();
+        const y = touch.clientY - rect.top;
+
+        // Detect swipe down for slide
+        if (y - this.input.touchStartY > 50 && !this.input.isSlidePressed) {
+          this.input.isSlidePressed = true;
+          if (this.player) this.player.slide();
+        }
+        // Detect swipe up for jump
+        else if (this.input.touchStartY - y > 50 && !this.input.isJumpPressed) {
+          this.handleJump();
+        }
+      },
+      { passive: false }
+    );
+
+    this.canvas.addEventListener(
       "touchend",
       (e) => {
-        if (!this.state.isRunning) return;
+        if (!this.state.isRunning || this.state.isPaused) return;
         e.preventDefault(); // Prevent default behavior
 
         // End slide if sliding
@@ -167,19 +215,33 @@ class Game {
     );
 
     // Add help button event listener
-    document.getElementById("help-button").addEventListener("click", () => {
-      this.showInstructions();
-    });
+    const helpButton = document.getElementById("help-button");
+    if (helpButton) {
+      helpButton.addEventListener("click", () => {
+        this.showInstructions();
+      });
+    }
 
     // Add back button event listener to return from instructions to game
-    document.getElementById("back-button").addEventListener("click", () => {
-      if (this.state.isRunning) {
-        this.ui.showGameUI();
-        // Don't unpause automatically - let the player decide when to resume
-      } else {
-        this.ui.showScreen("start");
-      }
-    });
+    const backButton = document.getElementById("back-button");
+    if (backButton) {
+      backButton.addEventListener("click", () => {
+        if (this.state.isRunning) {
+          this.ui.showGameUI();
+          // Don't unpause automatically - let the player decide when to resume
+        } else {
+          this.ui.showScreen("start");
+        }
+      });
+    }
+
+    // Add pause/resume button event listener
+    const pauseButton = document.getElementById("pause-button");
+    if (pauseButton) {
+      pauseButton.addEventListener("click", () => {
+        this.togglePause();
+      });
+    }
   }
 
   /**
@@ -196,12 +258,12 @@ class Game {
     // Check for double jump (if jump pressed within 300ms of last jump)
     if (timeSinceLastJump < 300) {
       this.input.jumpTimer = 0;
+      this.player.jump(); // This will trigger double jump if conditions are met
+    } else {
+      this.player.jump();
     }
 
     this.input.lastJumpTime = now;
-
-    // Trigger jump
-    this.player.jump();
   }
 
   /**
@@ -209,11 +271,16 @@ class Game {
    */
   startGame() {
     // Reset game state
-    this.state = {
-      isRunning: true,
-      isPaused: false,
-      isGameOver: false,
-      score: 0,
+    this.state.isRunning = true;
+    this.state.isPaused = false;
+    this.state.isGameOver = false;
+    this.state.score = 0;
+    this.state.coffeeBoost = 0;
+    this.state.deadlineProximity = 0;
+    this.state.powerUps = {
+      coffee: 0,
+      invincibility: 0,
+      gitCommits: 0,
     };
 
     // Create player
@@ -223,48 +290,80 @@ class Game {
 
     // Create level
     this.level = new Level({
-      theme: "legacy", // Start with legacy theme
+      theme: "startup",
       width: this.canvas.width,
       height: this.canvas.height,
     });
 
-    // Reset input state
-    this.input = {
-      isJumpPressed: false,
-      isSlidePressed: false,
-      jumpTimer: 0,
-      lastJumpTime: 0,
-    };
-
-    // Hide start screen and show game UI
-    this.ui.showGameUI();
+    // Show game UI
+    this.ui.showScreen("game");
 
     // Start game loop
     this.lastFrameTime = performance.now();
-    this.gameLoop(this.lastFrameTime);
+    this.accumulatedTime = 0;
+
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
+
+    this.animationFrameId = requestAnimationFrame((timestamp) =>
+      this.gameLoop(timestamp)
+    );
+
+    // Play background music
+    if (Assets.playMusic) {
+      Assets.playMusic("main");
+    }
   }
 
   /**
    * Restart the game after game over
    */
   restartGame() {
-    // Hide game over screen
-    this.ui.hideGameOver();
+    // Cancel any existing animation frame
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
 
     // Start a new game
     this.startGame();
   }
 
   /**
-   * Toggle game pause state
+   * Toggle pause state
    */
   togglePause() {
+    if (!this.state.isRunning || this.state.isGameOver) return;
+
     this.state.isPaused = !this.state.isPaused;
 
-    if (!this.state.isPaused) {
+    if (this.state.isPaused) {
+      // Show pause message
+      const pauseMessage = document.getElementById("pause-message");
+      if (pauseMessage) {
+        pauseMessage.classList.remove("hidden");
+      }
+
+      // Pause music
+      if (Assets.stopMusic) {
+        Assets.stopMusic();
+      }
+    } else {
+      // Hide pause message
+      const pauseMessage = document.getElementById("pause-message");
+      if (pauseMessage) {
+        pauseMessage.classList.add("hidden");
+      }
+
+      // Resume music
+      if (Assets.playMusic) {
+        Assets.playMusic("main");
+      }
+
       // Resume game loop
       this.lastFrameTime = performance.now();
-      this.gameLoop(this.lastFrameTime);
+      this.accumulatedTime = 0;
     }
   }
 
@@ -273,8 +372,10 @@ class Game {
    */
   showInstructions() {
     if (this.state.isRunning && !this.state.isPaused) {
-      this.togglePause(); // Pause the game
+      this.state.isPaused = true;
     }
+
+    // Show instructions screen
     this.ui.showScreen("instructions");
   }
 
@@ -282,37 +383,58 @@ class Game {
    * End the game
    */
   endGame() {
+    if (this.state.isGameOver) return;
+
     this.state.isRunning = false;
     this.state.isGameOver = true;
 
-    // Save high score
-    Utils.saveHighScore(this.state.score);
+    // Check for high score
+    const isNewHighScore = Utils.setHighScore(this.state.score);
 
     // Show game over screen
-    this.ui.showGameOver(this.state.score);
+    this.ui.showGameOver(
+      this.state.score,
+      Utils.getHighScore(),
+      isNewHighScore
+    );
 
-    // Show restart hint
+    // Show restart hint for keyboard users
     this.ui.showRestartHint();
 
-    // Cancel animation frame
-    if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null;
+    // Play game over sound
+    if (Assets.playSfx) {
+      Assets.playSfx("gameOver");
+    }
+
+    // Stop background music
+    if (Assets.stopMusic) {
+      Assets.stopMusic();
+    }
+
+    // Add confetti effect for new high score
+    if (isNewHighScore) {
+      this.ui.addEffect("confetti", 3000);
     }
   }
 
   /**
    * Main game loop
-   * @param {number} timestamp - Current timestamp
+   * @param {number} timestamp - Current timestamp from requestAnimationFrame
    */
   gameLoop(timestamp) {
-    // Calculate delta time
+    // Calculate time since last frame
     const deltaTime = timestamp - this.lastFrameTime;
     this.lastFrameTime = timestamp;
 
-    // Skip update if paused
-    if (!this.state.isPaused) {
-      this.update(deltaTime);
+    // Accumulate time for fixed time step
+    this.accumulatedTime += deltaTime;
+
+    // Update game state at fixed intervals
+    while (this.accumulatedTime >= this.timeStep) {
+      if (!this.state.isPaused) {
+        this.update(this.timeStep);
+      }
+      this.accumulatedTime -= this.timeStep;
     }
 
     // Render game
@@ -320,8 +442,8 @@ class Game {
 
     // Continue game loop if game is running
     if (this.state.isRunning) {
-      this.animationFrameId = requestAnimationFrame((time) =>
-        this.gameLoop(time)
+      this.animationFrameId = requestAnimationFrame((timestamp) =>
+        this.gameLoop(timestamp)
       );
     }
   }
@@ -331,59 +453,74 @@ class Game {
    * @param {number} deltaTime - Time since last update in ms
    */
   update(deltaTime) {
-    // Cap delta time to prevent large jumps
-    const cappedDeltaTime = Math.min(deltaTime, 100);
+    if (!this.player || !this.level) return;
 
     // Update player
-    if (this.player && this.player.isActive) {
-      this.player.update(cappedDeltaTime);
+    this.player.update(deltaTime);
 
-      // Update score based on distance
-      this.state.score = Math.floor(
-        this.player.score + this.level.distance / 10
-      );
-    }
+    // Update level and check if deadline caught up
+    const isDeadlineCaught = this.level.update(deltaTime, this.player);
 
-    // Update level
-    if (this.level) {
-      this.level.update(cappedDeltaTime, this.player);
-
-      // Check if deadline caught up with player
-      if (this.level.isDeadlineCaught() && !this.state.isGameOver) {
-        this.player.crash();
-        this.ui.addEffect("flash", 500);
-      }
-    }
-
-    // Check for game over conditions
-    if (
-      (this.player && !this.player.isActive) ||
-      (this.level && this.level.isDeadlineCaught())
-    ) {
+    // Check if player is still active
+    if (!this.player.isActive || isDeadlineCaught) {
       this.endGame();
+      return;
     }
 
-    // Update HUD
-    this.updateHUD();
+    // Update score based on distance traveled
+    this.state.score = Math.floor(this.level.distance) + this.player.score;
+
+    // Update power-ups
+    this.updatePowerUps(deltaTime);
+
+    // Update UI
+    this.updateUI();
   }
 
   /**
-   * Update HUD elements
+   * Update power-up states
+   * @param {number} deltaTime - Time since last update in ms
    */
-  updateHUD() {
-    if (!this.player || !this.level) return;
+  updatePowerUps(deltaTime) {
+    // Update coffee boost
+    if (this.player.state.hasSpeedBoost) {
+      this.state.coffeeBoost = (this.player.speedBoostDuration / 5000) * 100;
+      this.state.powerUps.coffee = this.player.speedBoostDuration;
+    } else {
+      this.state.coffeeBoost = 0;
+      this.state.powerUps.coffee = 0;
+    }
 
-    // Calculate coffee boost percentage
-    const coffeeBoost = this.player.state.hasSpeedBoost
-      ? (this.player.speedBoostDuration / 5000) * 100
-      : 0;
+    // Update invincibility
+    if (this.player.invincible) {
+      this.state.powerUps.invincibility = this.player.invincibilityDuration;
+    } else {
+      this.state.powerUps.invincibility = 0;
+    }
 
-    // Update UI
+    // Update git commits
+    this.state.powerUps.gitCommits = this.player.gitCommits;
+
+    // Update deadline proximity
+    this.state.deadlineProximity = this.level.getDeadlineProximity();
+  }
+
+  /**
+   * Update UI elements
+   */
+  updateUI() {
+    // Update HUD
     this.ui.updateHUD({
       score: this.state.score,
-      coffeeBoost: coffeeBoost,
-      deadlineProximity: this.level.getDeadlineProximity(),
+      coffeeBoost: this.state.coffeeBoost,
+      deadlineProximity: this.state.deadlineProximity,
+      powerUps: this.state.powerUps,
     });
+
+    // Add warning effect when deadline is close
+    if (this.level.isDeadlineWarning()) {
+      this.ui.addEffect("flash", 500);
+    }
   }
 
   /**
@@ -393,17 +530,17 @@ class Game {
     // Clear canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Draw level
+    // Render level
     if (this.level) {
       this.level.draw(this.ctx);
     }
 
-    // Draw player
+    // Render player
     if (this.player) {
       this.player.draw(this.ctx);
     }
 
-    // Draw debug info
+    // Draw debug info if debug mode is enabled
     if (window.DEBUG_MODE) {
       this.drawDebugInfo();
     }
@@ -414,50 +551,107 @@ class Game {
    */
   drawDebugInfo() {
     this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    this.ctx.fillRect(10, 10, 200, 100);
-
-    this.ctx.fillStyle = "white";
+    this.ctx.fillRect(10, 10, 300, 120);
+    this.ctx.fillStyle = "#ffffff";
     this.ctx.font = "12px monospace";
 
-    this.ctx.fillText(
+    const debugInfo = [
       `FPS: ${Math.round(1000 / (performance.now() - this.lastFrameTime))}`,
-      20,
-      30
-    );
-    this.ctx.fillText(
-      `Objects: ${
-        this.level.obstacles.length + this.level.collectibles.length
-      }`,
-      20,
-      50
-    );
-    this.ctx.fillText(`Speed: ${Math.round(this.level.speed)}`, 20, 70);
-    this.ctx.fillText(
+      `Player State: ${Object.entries(this.player.state)
+        .filter(([_, value]) => value === true)
+        .map(([key]) => key)
+        .join(", ")}`,
+      `Player Position: (${Math.round(this.player.x)}, ${Math.round(
+        this.player.y
+      )})`,
+      `Player Velocity: (${Math.round(this.player.velocityX)}, ${Math.round(
+        this.player.velocityY
+      )})`,
+      `Distance: ${Math.round(this.level.distance)}`,
       `Difficulty: ${this.level.difficulty.toFixed(2)}`,
-      20,
-      90
-    );
+      `Deadline: ${this.state.deadlineProximity.toFixed(2)}%`,
+    ];
+
+    debugInfo.forEach((text, index) => {
+      this.ctx.fillText(text, 20, 30 + index * 15);
+    });
   }
 
   /**
-   * Resize canvas to fit container
+   * Resize canvas to fit window
    */
   resizeCanvas() {
+    // Get container dimensions
     const container = document.getElementById("game-container");
+    if (!container) return;
 
-    // Set canvas size to match container
-    this.canvas.width = container.clientWidth;
-    this.canvas.height = container.clientHeight;
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
 
-    // Update level and player if they exist
+    // Set canvas size
+    this.canvas.width = containerWidth;
+    this.canvas.height = containerHeight;
+
+    // Update ground position if level exists
     if (this.level) {
-      this.level.width = this.canvas.width;
-      this.level.height = this.canvas.height;
       this.level.groundY = this.canvas.height - 50;
     }
 
+    // Update player position if player exists
     if (this.player) {
       this.player.groundY = this.canvas.height - 50;
+
+      // If player is on the ground, update Y position
+      if (!this.player.state.isJumping) {
+        this.player.y = this.player.groundY - this.player.height;
+      }
     }
+  }
+
+  /**
+   * Handle power-up collision
+   * @param {string} powerUpType - Type of power-up collected
+   */
+  handlePowerUpCollision(powerUp) {
+    if (!this.player) return;
+
+    switch (powerUp.type) {
+      case "coffee":
+        this.player.collectCoffee();
+        this.ui.addEffect("flash", 300);
+        break;
+
+      case "stackOverflow":
+        this.player.collectStackOverflow();
+        this.ui.addEffect("flash", 300);
+        break;
+
+      case "gitCommit":
+        this.player.collectGitCommit();
+        this.ui.addEffect("flash", 300);
+        break;
+
+      case "codeSnippet":
+        this.player.collectCodeSnippet();
+        break;
+    }
+  }
+
+  /**
+   * Use a git commit to save the player
+   */
+  useGitCommit() {
+    if (this.player && this.player.gitCommits > 0) {
+      this.player.gitCommits--;
+      this.player.invincible = true;
+      this.player.invincibilityDuration = 2000; // 2 seconds of invincibility
+
+      if (Assets.playSfx) {
+        Assets.playSfx("powerup");
+      }
+
+      return true;
+    }
+    return false;
   }
 }

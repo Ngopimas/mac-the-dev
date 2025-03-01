@@ -185,6 +185,45 @@ class Collectible extends Sprite {
     // Deactivate the collectible after it's collected
     this.isActive = false;
   }
+
+  /**
+   * Draw the collectible with special effects
+   * @param {CanvasRenderingContext2D} ctx - Canvas context
+   */
+  draw(ctx) {
+    if (!this.isVisible) return;
+
+    ctx.save();
+
+    // Apply rotation for git commits
+    if (this.type === "gitCommit" && this.rotation) {
+      ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+      ctx.rotate(this.rotation);
+      ctx.drawImage(
+        this.image,
+        -this.width / 2,
+        -this.height / 2,
+        this.width,
+        this.height
+      );
+    } else {
+      // Normal drawing for other collectibles
+      ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+    }
+
+    ctx.restore();
+
+    // Debug: draw collision box
+    if (window.DEBUG_MODE) {
+      ctx.strokeStyle = "rgba(0, 255, 0, 0.5)";
+      ctx.strokeRect(
+        this.collisionBox.x,
+        this.collisionBox.y,
+        this.collisionBox.width,
+        this.collisionBox.height
+      );
+    }
+  }
 }
 
 /**
@@ -266,24 +305,23 @@ const CollectibleFactory = {
    * Create a row of code snippets
    * @param {number} speed - Base speed for the collectibles
    * @param {number} groundY - Y position of the ground
-   * @param {number} count - Number of snippets in the row
+   * @param {number} count - Number of snippets to create
    * @param {number} startX - Starting X position
    * @param {number} y - Y position for the row
-   * @returns {Array} - Array of collectible instances
+   * @returns {Collectible[]} - Array of collectibles
    */
   createCodeSnippetRow: function (speed, groundY, count, startX, y) {
     const snippets = [];
     const spacing = 40;
 
     for (let i = 0; i < count; i++) {
-      snippets.push(
-        new Collectible({
-          type: "codeSnippet",
-          speed: speed,
-          x: startX + i * spacing,
-          y: y || groundY - 100,
-        })
-      );
+      const snippet = new Collectible({
+        type: "codeSnippet",
+        speed: speed,
+        x: startX + i * spacing,
+        y: y || groundY - 100,
+      });
+      snippets.push(snippet);
     }
 
     return snippets;

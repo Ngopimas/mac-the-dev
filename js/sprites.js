@@ -231,5 +231,16 @@ class BackgroundSprite extends Sprite {
       this.width,
       this.height
     );
+
+    // Draw third instance if needed (for wider screens or fast scrolling)
+    if (canvasWidth > this.width * 2 || this.scrollSpeed > 0.5) {
+      ctx.drawImage(
+        this.image,
+        this.x + this.width * 2,
+        this.y,
+        this.width,
+        this.height
+      );
+    }
   }
 }

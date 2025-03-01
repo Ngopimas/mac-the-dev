@@ -99,7 +99,8 @@ class Obstacle extends Sprite {
    * @param {number} deltaTime - Time since last update in ms
    */
   update(deltaTime) {
-    super.update(deltaTime);
+    // Update position based on velocity
+    this.x += this.velocityX * (deltaTime / 1000);
 
     // Apply special behaviors based on obstacle type
     switch (this.type) {
@@ -122,12 +123,12 @@ class Obstacle extends Sprite {
           const growthFactor = this.currentGrowth;
           this.width = 50 * growthFactor;
           this.height = 70 * growthFactor;
-
-          // Update collision box
-          this.updateCollisionBox();
         }
         break;
     }
+
+    // Update collision box
+    this.updateCollisionBox();
 
     // Remove if off screen
     if (this.x < -this.width) {
@@ -169,6 +170,28 @@ class Obstacle extends Sprite {
           this.isActive = false;
         }
         break;
+    }
+  }
+
+  /**
+   * Draw the obstacle with special effects
+   * @param {CanvasRenderingContext2D} ctx - Canvas context
+   */
+  draw(ctx) {
+    if (!this.isVisible) return;
+
+    // Draw the obstacle
+    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+
+    // Debug: draw collision box
+    if (window.DEBUG_MODE) {
+      ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
+      ctx.strokeRect(
+        this.collisionBox.x,
+        this.collisionBox.y,
+        this.collisionBox.width,
+        this.collisionBox.height
+      );
     }
   }
 }

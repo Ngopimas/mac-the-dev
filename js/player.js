@@ -36,6 +36,12 @@ class Player extends Sprite {
     this.speedBoostDuration = 0;
     this.invincible = false;
     this.invincibilityDuration = 0;
+    this.invincibilityFlashTimer = 0;
+    this.coyoteTime = 100; // Time in ms that player can still jump after leaving ground
+    this.coyoteTimeCounter = 0;
+    this.jumpBufferTime = 150; // Time in ms to buffer a jump input before landing
+    this.jumpBufferCounter = 0;
+    this.canDoubleJump = false;
 
     // Collectibles
     this.score = 0;
@@ -60,13 +66,16 @@ class Player extends Sprite {
   update(deltaTime) {
     if (this.state.isCrashed) {
       // Only update position if crashed (falling)
-      super.update(deltaTime);
+      this.velocityY += this.gravity * (deltaTime / 1000);
+      this.y += this.velocityY * (deltaTime / 1000);
 
       // Check if player has fallen off screen
       if (this.y > this.groundY + 200) {
         this.isActive = false;
       }
 
+      // Update collision box
+      this.updateCollisionBox();
       return;
     }
 
@@ -83,14 +92,48 @@ class Player extends Sprite {
     // Update invincibility
     if (this.invincible) {
       this.invincibilityDuration -= deltaTime;
+      this.invincibilityFlashTimer += deltaTime;
+
+      // Flash effect for invincibility
+      if (this.invincibilityFlashTimer >= 100) {
+        this.isVisible = !this.isVisible;
+        this.invincibilityFlashTimer = 0;
+      }
 
       if (this.invincibilityDuration <= 0) {
         this.invincible = false;
+        this.isVisible = true; // Ensure player is visible when invincibility ends
       }
     }
 
-    // Apply gravity and update position
-    super.update(deltaTime);
+    // Apply gravity if in the air
+    if (this.state.isJumping || this.y < this.groundY - this.height) {
+      this.velocityY += this.gravity * (deltaTime / 1000);
+    }
+
+    // Update position
+    this.y += this.velocityY * (deltaTime / 1000);
+
+    // Update coyote time (time window where player can still jump after leaving ground)
+    if (!this.state.isJumping && this.y < this.groundY - this.height) {
+      this.coyoteTimeCounter += deltaTime;
+      if (this.coyoteTimeCounter > this.coyoteTime) {
+        this.state.isJumping = true;
+      }
+    } else {
+      this.coyoteTimeCounter = 0;
+    }
+
+    // Update jump buffer (time window where jump input is remembered before landing)
+    if (this.jumpBufferCounter > 0) {
+      this.jumpBufferCounter -= deltaTime;
+
+      // If we're on the ground and have a buffered jump, execute it
+      if (!this.state.isJumping && this.y >= this.groundY - this.height) {
+        this.executeJump();
+        this.jumpBufferCounter = 0;
+      }
+    }
 
     // Check if player has landed after jumping
     if (this.state.isJumping && this.y >= this.groundY - this.height) {
@@ -147,22 +190,48 @@ class Player extends Sprite {
    * Make the player jump
    */
   jump() {
-    // Add a small coyote time (allow jumping slightly after falling off platform)
-    const canJump =
-      !this.state.isJumping ||
-      (this.state.isJumping && this.y < this.groundY - this.height + 10);
+    // If we're in the air and not able to double jump, buffer the jump
+    if (
+      (this.state.isJumping || this.y < this.groundY - this.height) &&
+      !this.canDoubleJump &&
+      !this.state.isDoubleJumping
+    ) {
+      this.jumpBufferCounter = this.jumpBufferTime;
+      return;
+    }
 
-    if (canJump && !this.state.isDoubleJumping) {
-      // First jump
-      this.velocityY = this.jumpForce;
-      this.state.isJumping = true;
-      this.state.isRunning = false;
-      this.state.isSliding = false;
-      Assets.playSfx("jump");
-    } else if (this.state.isJumping && !this.state.isDoubleJumping) {
-      // Double jump
-      this.velocityY = this.jumpForce * 0.8;
-      this.state.isDoubleJumping = true;
+    // If we can jump (on ground or within coyote time) or can double jump
+    if (
+      !this.state.isJumping ||
+      this.coyoteTimeCounter <= this.coyoteTime ||
+      this.canDoubleJump
+    ) {
+      if (!this.state.isJumping || this.coyoteTimeCounter <= this.coyoteTime) {
+        // First jump
+        this.executeJump();
+        this.canDoubleJump = true;
+      } else if (this.canDoubleJump) {
+        // Double jump
+        this.velocityY = this.jumpForce * 0.8;
+        this.state.isDoubleJumping = true;
+        this.canDoubleJump = false;
+        if (Assets.playSfx) {
+          Assets.playSfx("jump");
+        }
+      }
+    }
+  }
+
+  /**
+   * Execute the jump (internal method)
+   */
+  executeJump() {
+    this.velocityY = this.jumpForce;
+    this.state.isJumping = true;
+    this.state.isRunning = false;
+    this.state.isSliding = false;
+    this.coyoteTimeCounter = this.coyoteTime + 1; // Prevent double first jump
+    if (Assets.playSfx) {
       Assets.playSfx("jump");
     }
   }
@@ -197,70 +266,86 @@ class Player extends Sprite {
    * Land after jumping
    */
   land() {
-    this.y = this.groundY - this.height;
-    this.velocityY = 0;
     this.state.isJumping = false;
     this.state.isDoubleJumping = false;
     this.state.isRunning = true;
+    this.velocityY = 0;
+    this.canDoubleJump = false;
   }
 
   /**
-   * Crash the player (hit by obstacle)
+   * Crash the player
    */
   crash() {
-    if (this.invincible) return;
+    if (this.invincible) return; // Don't crash if invincible
+
+    if (this.gitCommits > 0) {
+      // Use a git commit instead of crashing
+      this.gitCommits--;
+      this.invincible = true;
+      this.invincibilityDuration = 2000; // 2 seconds of invincibility
+      if (Assets.playSfx) {
+        Assets.playSfx("powerup");
+      }
+      return;
+    }
 
     this.state.isCrashed = true;
     this.state.isRunning = false;
     this.state.isJumping = false;
     this.state.isSliding = false;
-
-    // Apply "crash" physics
-    this.velocityY = this.jumpForce * 0.5;
-    this.velocityX = -100;
-
-    Assets.playSfx("crash");
+    this.velocityY = this.jumpForce / 2; // Small upward bounce on crash
+    if (Assets.playSfx) {
+      Assets.playSfx("crash");
+    }
   }
 
   /**
-   * Collect a coffee power-up
+   * Collect coffee power-up
    */
   collectCoffee() {
     this.coffeeCount++;
+    this.score += 50;
     this.state.hasSpeedBoost = true;
-    this.speedBoost = 200;
-    this.speedBoostDuration = 5000; // 5 seconds
-
-    Assets.playSfx("powerup");
+    this.speedBoost = 300;
+    this.speedBoostDuration = 8000;
+    if (Assets.playSfx) {
+      Assets.playSfx("collect");
+    }
   }
 
   /**
-   * Collect a Stack Overflow answer (invincibility)
+   * Collect Stack Overflow power-up
    */
   collectStackOverflow() {
+    this.score += 100;
     this.invincible = true;
-    this.invincibilityDuration = 3000; // 3 seconds
-
-    Assets.playSfx("powerup");
+    this.invincibilityDuration = 5000; // 5 seconds
+    if (Assets.playSfx) {
+      Assets.playSfx("powerup");
+    }
   }
 
   /**
-   * Collect a Git commit (checkpoint)
+   * Collect Git Commit power-up
    */
   collectGitCommit() {
     this.gitCommits++;
-
-    Assets.playSfx("collect");
+    this.score += 150;
+    if (Assets.playSfx) {
+      Assets.playSfx("collect");
+    }
   }
 
   /**
-   * Collect a code snippet (points)
+   * Collect Code Snippet
    */
   collectCodeSnippet() {
     this.codeSnippets++;
     this.score += 10;
-
-    Assets.playSfx("collect");
+    if (Assets.playSfx) {
+      Assets.playSfx("collect");
+    }
   }
 
   /**
@@ -268,20 +353,15 @@ class Player extends Sprite {
    * @returns {number} - Current speed
    */
   getSpeed() {
-    // Slightly reduce speed when jumping to make the game more controllable
-    const jumpingModifier = this.state.isJumping ? 0.9 : 1;
-    return (this.baseSpeed + this.speedBoost) * jumpingModifier;
+    return this.baseSpeed + this.speedBoost;
   }
 
   /**
    * Reset player to initial state
    */
   reset() {
-    this.x = 100;
     this.y = this.groundY - 50;
-    this.velocityX = 0;
     this.velocityY = 0;
-
     this.state = {
       isRunning: true,
       isJumping: false,
@@ -290,18 +370,17 @@ class Player extends Sprite {
       isCrashed: false,
       hasSpeedBoost: false,
     };
-
     this.speedBoost = 0;
     this.speedBoostDuration = 0;
     this.invincible = false;
     this.invincibilityDuration = 0;
-
+    this.isVisible = true;
+    this.isActive = true;
     this.score = 0;
     this.coffeeCount = 0;
     this.codeSnippets = 0;
     this.gitCommits = 0;
-
-    this.isActive = true;
-    this.updateSprite();
+    this.height = 50;
+    this.updateCollisionBox();
   }
 }
