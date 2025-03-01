@@ -1,9 +1,8 @@
 /**
- * Asset management for Mac the Developer game
+ * Asset management
  */
 
 const Assets = {
-  // Image assets
   images: {
     // Player sprites
     player: {
@@ -13,7 +12,6 @@ const Assets = {
       crash: null,
     },
 
-    // Obstacles
     obstacles: {
       bug: null,
       mergeConflict: null,
@@ -21,7 +19,6 @@ const Assets = {
       technicalDebt: null,
     },
 
-    // Collectibles
     collectibles: {
       coffee: null,
       stackOverflow: null,
@@ -29,7 +26,6 @@ const Assets = {
       codeSnippet: null,
     },
 
-    // Backgrounds
     backgrounds: {
       legacy: null,
       startup: null,
@@ -37,7 +33,6 @@ const Assets = {
     },
   },
 
-  // Audio assets
   audio: {
     // Sound effects
     sfx: {
@@ -49,7 +44,6 @@ const Assets = {
       gameOver: null,
     },
 
-    // Music
     music: {
       main: null,
       gameOver: null,
@@ -62,10 +56,7 @@ const Assets = {
    */
   loadAll: async function () {
     try {
-      // Create placeholder sprites for MVP
       this.createPlaceholderSprites();
-
-      // Initialize audio placeholders
       this.initAudioPlaceholders();
 
       console.log("All assets loaded successfully");
@@ -82,8 +73,6 @@ const Assets = {
    * Create emergency placeholder sprites if normal loading fails
    */
   createEmergencyPlaceholders: function () {
-    // Create player character
-
     // Laptop character
     this.images.player.run = this.createLaptopSprite(
       "#aaaaaa", // Silver aluminum color
@@ -110,7 +99,6 @@ const Assets = {
       50
     );
 
-    // Create basic colored rectangles for other assets
     const canvas = document.createElement("canvas");
     canvas.width = 50;
     canvas.height = 50;
@@ -140,7 +128,6 @@ const Assets = {
    * Initialize audio placeholders
    */
   initAudioPlaceholders: function () {
-    // Create dummy audio play function
     this.playSfx = function (sfxName) {
       console.log(`Playing sound effect: ${sfxName}`);
     };
@@ -169,19 +156,17 @@ const Assets = {
 
     const ctx = canvas.getContext("2d");
 
-    // Add shadow effect
     ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
     ctx.shadowBlur = 5;
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
 
-    // Check if this is a sliding state (closed laptop)
     const isSliding = height <= 35;
 
     if (isSliding) {
       // SLIDING STATE - CLOSED
 
-      // Laptop dimensions - make it more sleek
+      // Laptop dimensions
       const laptopWidth = width * 0.85;
       const laptopHeight = height * 0.5; // Thinner profile
       const cornerRadius = 6;
@@ -190,7 +175,6 @@ const Assets = {
       const offsetX = (width - laptopWidth) / 2;
       const offsetY = (height - laptopHeight) / 2 + height * 0.1; // Slightly lower position
 
-      // Draw the closed laptop body with rounded corners - sleek aluminum look
       ctx.fillStyle = baseColor;
       this.roundedRect(
         ctx,
@@ -201,7 +185,6 @@ const Assets = {
         cornerRadius
       );
 
-      // Add a subtle line to represent the closed seam
       ctx.strokeStyle = "#888888";
       ctx.lineWidth = 0.5;
       ctx.beginPath();
@@ -209,7 +192,6 @@ const Assets = {
       ctx.lineTo(offsetX + laptopWidth - 5, offsetY + laptopHeight / 2);
       ctx.stroke();
 
-      // Add subtle shading to give 3D effect
       const topGradient = ctx.createLinearGradient(
         0,
         offsetY,
@@ -230,7 +212,6 @@ const Assets = {
       );
       ctx.fill();
 
-      // Add logo in the center (simplified)
       ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
       const logoX = width / 2;
       const logoY = offsetY + laptopHeight / 2;
@@ -240,7 +221,6 @@ const Assets = {
       ctx.arc(logoX, logoY, logoSize / 2, 0, Math.PI * 2);
       ctx.fill();
 
-      // Add motion blur lines behind the laptop for sliding effect
       ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
       ctx.lineWidth = 1.5;
 
@@ -250,30 +230,26 @@ const Assets = {
         ctx.lineTo(offsetX - i * 12, offsetY + laptopHeight * 0.7);
         ctx.stroke();
       }
-
-      // No shadow beneath the laptop - removing the table-like appearance
     } else {
       // OPEN LAPTOP STATES (running, jumping, crashed)
 
-      // Better proportions - thinner and more elegant
+      // Laptop proportions
       const laptopWidth = width * 0.9;
       const screenThickness = 2;
       const screenWidth = laptopWidth - 8;
       const hinge = height * 0.65; // Position where screen meets base
       const cornerRadius = 8;
-      const baseHeight = height * 0.25; // Thinner base (less table-like)
+      const baseHeight = height * 0.25; // Thinner base
       const screenHeight = hinge - 8;
 
       // Center the laptop horizontally
       const offsetX = (width - laptopWidth) / 2;
 
-      // Reset shadow for base drawing
       ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
       ctx.shadowBlur = 5;
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 5;
 
-      // Draw laptop base (bottom part) - sleeker aluminum finish
       ctx.fillStyle = baseColor;
       this.roundedRect(
         ctx,
@@ -284,7 +260,6 @@ const Assets = {
         cornerRadius
       );
 
-      // Add gradient to base for 3D effect
       const baseGradient = ctx.createLinearGradient(
         0,
         hinge,
@@ -305,10 +280,8 @@ const Assets = {
         cornerRadius
       );
 
-      // Reset shadow for cleaner lines
       ctx.shadowColor = "transparent";
 
-      // Draw laptop screen (top part) - very thin profile like premium laptops
       ctx.fillStyle = "#888888"; // Darker for the back of the screen
       this.roundedRect(
         ctx,
@@ -319,7 +292,6 @@ const Assets = {
         cornerRadius / 2
       );
 
-      // Draw the screen sides/edges
       ctx.fillStyle = "#777777";
       // Left edge
       ctx.fillRect(offsetX + 4, 8, screenThickness, screenHeight);
@@ -330,7 +302,7 @@ const Assets = {
         screenThickness,
         screenHeight
       );
-      // Bottom edge (connects to hinge)
+      // Bottom edge
       ctx.fillRect(
         offsetX + 4,
         8 + screenHeight - screenThickness,
@@ -338,7 +310,6 @@ const Assets = {
         screenThickness
       );
 
-      // Draw the screen back panel (aluminum)
       const screenBackGradient = ctx.createLinearGradient(
         0,
         8,
@@ -358,7 +329,6 @@ const Assets = {
         cornerRadius / 2
       );
 
-      // Draw hinge detail - more realistic modern laptop hinge
       const hingeGradient = ctx.createLinearGradient(
         0,
         hinge - 4,
@@ -374,11 +344,9 @@ const Assets = {
       ctx.rect(offsetX + 10, hinge - 4, laptopWidth - 20, 6);
       ctx.fill();
 
-      // Draw screen display with rounded corners - make it more screen-like with proper inset
       const screenInset = 6; // Thinner bezel like modern premium laptops
       const bezelColor = "#111111"; // Black bezel around screen
 
-      // Draw the bezel first
       ctx.fillStyle = bezelColor;
 
       // Screen coordinates with bezel
@@ -412,7 +380,6 @@ const Assets = {
         4 // More rounded corners for the screen
       );
 
-      // Add screen glare/reflection - more pronounced for glass-like effect
       const gradient = ctx.createLinearGradient(
         screenLeft,
         screenTop,
@@ -434,13 +401,11 @@ const Assets = {
       );
       ctx.fill();
 
-      // Add camera at the top center of the bezel - smaller like modern laptop cameras
       ctx.fillStyle = "#333333";
       ctx.beginPath();
       ctx.arc((bezelLeft + bezelRight) / 2, bezelTop + 3, 1.5, 0, Math.PI * 2);
       ctx.fill();
 
-      // Draw keyboard with better detail - make it look more like a premium laptop keyboard
       const keyboardTop = hinge + 6;
       const keyboardBottom = hinge + baseHeight - 5;
       const keyboardLeft = offsetX + 8;
@@ -448,7 +413,6 @@ const Assets = {
       const keyboardWidth = keyboardRight - keyboardLeft;
       const keyboardHeight = keyboardBottom - keyboardTop;
 
-      // Keyboard base (recessed area)
       const kbGradient = ctx.createLinearGradient(
         0,
         keyboardTop,
@@ -483,7 +447,6 @@ const Assets = {
           const keyY =
             keyboardTop + row * keySpacingY + (keySpacingY - keySize) / 2;
 
-          // Draw key with 3D effect and rounded corners - flatter like premium laptops
           const keyGradient = ctx.createLinearGradient(
             keyX,
             keyY,
@@ -498,7 +461,6 @@ const Assets = {
         }
       }
 
-      // Draw screen content based on state
       this.drawScreenContent(
         ctx,
         screenLeft,
@@ -563,15 +525,11 @@ const Assets = {
    * @param {string} state - Player state (run, jump, slide, crash)
    */
   drawScreenContent: function (ctx, x, y, width, height, state) {
-    // Draw different content based on state
     if (state === "run") {
       // Code editor with clean text editor-like lines
-
-      // Draw editor background
-      ctx.fillStyle = "#1e1e1e"; // VS Code dark theme color
+      ctx.fillStyle = "#1e1e1e"; // Dark theme color
       ctx.fillRect(x, y, width, height);
 
-      // Draw top menu bar (minimal style)
       const menuBarHeight = height * 0.08;
       ctx.fillStyle = "#2d2d2d";
       ctx.fillRect(x, y, width, menuBarHeight);
@@ -580,7 +538,6 @@ const Assets = {
       ctx.fillStyle = "#252526";
       ctx.fillRect(x, y + menuBarHeight, width * 0.1, height - menuBarHeight);
 
-      // Draw consistent text editor lines
       const lineCount = 10; // Number of lines
       const lineHeight = (height - menuBarHeight) / lineCount;
 
@@ -613,7 +570,6 @@ const Assets = {
         ctx.fillRect(x + width * 0.12, lineY, lineWidth, 1);
       }
 
-      // Draw cursor
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(
         x + width * 0.2,
@@ -623,21 +579,16 @@ const Assets = {
       );
     } else if (state === "jump") {
       // Terminal with clean text lines
-
-      // Terminal background
       ctx.fillStyle = "#1e1e1e";
       ctx.fillRect(x, y, width, height);
 
-      // Terminal header (minimal style)
       const headerHeight = height * 0.08;
       ctx.fillStyle = "#2d2d2d";
       ctx.fillRect(x, y, width, headerHeight);
 
-      // Draw terminal lines - clean and consistent
       const lineCount = 8;
       const lineHeight = (height - headerHeight) / lineCount;
 
-      // Draw lines with consistent spacing
       for (let i = 0; i < lineCount; i++) {
         const lineY = y + headerHeight + i * lineHeight + lineHeight / 2;
 
@@ -669,8 +620,6 @@ const Assets = {
       ctx.fillRect(x + 10 + width * 0.06, lastLineY, 4, 1);
     } else if (state === "crash") {
       // Error screen with clean text lines
-
-      // Background - dark with slight gradient
       const crashGradient = ctx.createLinearGradient(x, y, x, y + height);
       crashGradient.addColorStop(0, "#000000");
       crashGradient.addColorStop(1, "#111111");
@@ -678,7 +627,6 @@ const Assets = {
       ctx.fillStyle = crashGradient;
       ctx.fillRect(x, y, width, height);
 
-      // Draw consistent error message lines
       const lineCount = 8;
       const lineHeight = height / lineCount;
 
@@ -704,136 +652,6 @@ const Assets = {
         1.5
       );
     }
-  },
-
-  /**
-   * Create a developer character sprite
-   * @param {string} bodyColor - Color for the body
-   * @param {string} headColor - Color for the head
-   * @param {number} width - Sprite width
-   * @param {number} height - Sprite height
-   * @returns {HTMLCanvasElement} - Canvas element with the developer sprite
-   */
-  createDeveloperSprite: function (bodyColor, headColor, width, height) {
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-
-    const ctx = canvas.getContext("2d");
-
-    // Draw body
-    ctx.fillStyle = bodyColor;
-    ctx.beginPath();
-    ctx.moveTo(width * 0.3, height * 0.4);
-    ctx.lineTo(width * 0.7, height * 0.4);
-    ctx.lineTo(width * 0.65, height - 5);
-    ctx.lineTo(width * 0.35, height - 5);
-    ctx.closePath();
-    ctx.fill();
-
-    // Draw head
-    ctx.fillStyle = headColor;
-    ctx.beginPath();
-    ctx.arc(width * 0.5, height * 0.25, width * 0.2, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Draw arms
-    ctx.fillStyle = bodyColor;
-    // Left arm
-    ctx.beginPath();
-    ctx.moveTo(width * 0.3, height * 0.45);
-    ctx.lineTo(width * 0.15, height * 0.6);
-    ctx.lineTo(width * 0.2, height * 0.65);
-    ctx.lineTo(width * 0.35, height * 0.5);
-    ctx.closePath();
-    ctx.fill();
-
-    // Right arm
-    ctx.beginPath();
-    ctx.moveTo(width * 0.7, height * 0.45);
-    ctx.lineTo(width * 0.85, height * 0.6);
-    ctx.lineTo(width * 0.8, height * 0.65);
-    ctx.lineTo(width * 0.65, height * 0.5);
-    ctx.closePath();
-    ctx.fill();
-
-    // Draw glasses for running state
-    if (bodyColor === "#0066cc") {
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(width * 0.4, height * 0.25);
-      ctx.lineTo(width * 0.6, height * 0.25);
-      ctx.stroke();
-
-      // Draw eyes behind glasses
-      ctx.fillStyle = "#000000";
-      ctx.beginPath();
-      ctx.arc(width * 0.43, height * 0.25, 2, 0, Math.PI * 2);
-      ctx.arc(width * 0.57, height * 0.25, 2, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    return canvas;
-  },
-
-  /**
-   * Create a desktop computer sprite
-   * @param {string} caseColor - Color for the computer case
-   * @param {string} screenColor - Color for the screen
-   * @param {number} width - Sprite width
-   * @param {number} height - Sprite height
-   * @returns {HTMLCanvasElement} - Canvas element with the computer sprite
-   */
-  createComputerSprite: function (caseColor, screenColor, width, height) {
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-
-    const ctx = canvas.getContext("2d");
-
-    // Draw computer case (tower)
-    ctx.fillStyle = caseColor;
-    ctx.fillRect(width * 0.15, height * 0.3, width * 0.3, height * 0.65);
-
-    // Draw power button
-    ctx.fillStyle = "#00ff00";
-    ctx.beginPath();
-    ctx.arc(width * 0.3, height * 0.4, 2, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Draw disk drive
-    ctx.fillStyle = "#444444";
-    ctx.fillRect(width * 0.2, height * 0.5, width * 0.2, height * 0.05);
-
-    // Draw monitor
-    ctx.fillStyle = caseColor;
-    ctx.fillRect(width * 0.5, height * 0.35, width * 0.35, height * 0.3);
-
-    // Draw screen
-    ctx.fillStyle = screenColor;
-    ctx.fillRect(width * 0.55, height * 0.4, width * 0.25, height * 0.2);
-
-    // Draw monitor stand
-    ctx.fillStyle = caseColor;
-    ctx.beginPath();
-    ctx.moveTo(width * 0.65, height * 0.65);
-    ctx.lineTo(width * 0.75, height * 0.65);
-    ctx.lineTo(width * 0.8, height * 0.95);
-    ctx.lineTo(width * 0.6, height * 0.95);
-    ctx.closePath();
-    ctx.fill();
-
-    // Draw code on screen for running state
-    if (screenColor === "#00aaff") {
-      ctx.fillStyle = "#ffffff";
-      // Draw code lines
-      for (let i = 0; i < 4; i++) {
-        ctx.fillRect(width * 0.57, height * (0.42 + i * 0.04), width * 0.2, 1);
-      }
-    }
-
-    return canvas;
   },
 
   /**
@@ -1052,7 +870,7 @@ const Assets = {
    */
   loadAudio: async function () {
     // In a real implementation, we would load actual audio files
-    // For MVP, we'll just create empty Audio objects
+    // For now, we'll just create empty Audio objects
 
     // Sound effects
     this.audio.sfx.jump = new Audio();

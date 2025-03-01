@@ -1,13 +1,15 @@
 /**
- * Obstacles for Mac the Developer game
+ * Game obstacles that the player must avoid or interact with
  */
 
 class Obstacle extends Sprite {
   /**
    * Create a new obstacle
    * @param {Object} options - Obstacle options
-   * @param {string} options.type - Obstacle type
-   * @param {number} options.speed - Obstacle speed
+   * @param {string} [options.type="bug"] - Obstacle type: "bug", "mergeConflict", "meeting", or "technicalDebt"
+   * @param {number} [options.speed=300] - Obstacle movement speed in pixels per second
+   * @param {number} [options.x=800] - Initial x position
+   * @param {number} [options.y=0] - Initial y position
    */
   constructor(options) {
     const type = options.type || "bug";
@@ -60,15 +62,12 @@ class Obstacle extends Sprite {
       height: this.height - 10,
     };
 
-    // Special properties for different obstacle types
     this.setupSpecialProperties();
-
-    // Set emoji based on obstacle type
     this.emoji = this.getObstacleEmoji();
   }
 
   /**
-   * Set up special properties based on obstacle type
+   * Initializes type-specific properties for obstacle behavior
    */
   setupSpecialProperties() {
     switch (this.type) {
@@ -98,8 +97,8 @@ class Obstacle extends Sprite {
   }
 
   /**
-   * Update obstacle position and special behaviors
-   * @param {number} deltaTime - Time since last update in ms
+   * Updates obstacle position and applies type-specific behaviors
+   * @param {number} deltaTime - Time since last update in milliseconds
    */
   update(deltaTime) {
     // Update position based on velocity
@@ -130,7 +129,6 @@ class Obstacle extends Sprite {
         break;
     }
 
-    // Update collision box
     this.updateCollisionBox();
 
     // Remove if off screen
@@ -140,7 +138,7 @@ class Obstacle extends Sprite {
   }
 
   /**
-   * Update collision box position and size
+   * Synchronizes collision box with current obstacle position and size
    */
   updateCollisionBox() {
     this.collisionBox.x = this.x + 5;
@@ -150,8 +148,8 @@ class Obstacle extends Sprite {
   }
 
   /**
-   * Apply effect when player collides with this obstacle
-   * @param {Player} player - Player object
+   * Applies type-specific effects when player collides with this obstacle
+   * @param {Player} player - The player that collided with this obstacle
    */
   applyEffect(player) {
     switch (this.type) {
@@ -188,8 +186,8 @@ class Obstacle extends Sprite {
   }
 
   /**
-   * Get the emoji for this obstacle type
-   * @returns {string} - Emoji character
+   * Returns the appropriate emoji for the current obstacle type
+   * @returns {string} Emoji character representing this obstacle
    */
   getObstacleEmoji() {
     switch (this.type) {
@@ -207,8 +205,8 @@ class Obstacle extends Sprite {
   }
 
   /**
-   * Draw the obstacle with special effects
-   * @param {CanvasRenderingContext2D} ctx - Canvas context
+   * Renders the obstacle with its emoji and optional debug information
+   * @param {CanvasRenderingContext2D} ctx - Canvas rendering context
    */
   draw(ctx) {
     if (!this.isVisible) return;
@@ -236,14 +234,14 @@ class Obstacle extends Sprite {
 }
 
 /**
- * Obstacle factory for creating different types of obstacles
+ * Factory for creating different types of game obstacles
  */
 const ObstacleFactory = {
   /**
-   * Create a random obstacle
-   * @param {number} speed - Base speed for the obstacle
-   * @param {number} groundY - Y position of the ground
-   * @returns {Obstacle} - New obstacle instance
+   * Creates a random obstacle with appropriate positioning
+   * @param {number} speed - Base movement speed for the obstacle
+   * @param {number} groundY - Y position of the ground level
+   * @returns {Obstacle} A randomly selected obstacle instance
    */
   createRandom: function (speed, groundY) {
     const types = ["bug", "mergeConflict", "meeting", "technicalDebt"];
@@ -253,11 +251,11 @@ const ObstacleFactory = {
   },
 
   /**
-   * Create a specific type of obstacle
-   * @param {string} type - Obstacle type
-   * @param {number} speed - Base speed for the obstacle
-   * @param {number} groundY - Y position of the ground
-   * @returns {Obstacle} - New obstacle instance
+   * Creates a specific type of obstacle with appropriate positioning
+   * @param {string} type - Obstacle type to create
+   * @param {number} speed - Base movement speed for the obstacle
+   * @param {number} groundY - Y position of the ground level
+   * @returns {Obstacle} The created obstacle instance
    */
   create: function (type, speed, groundY) {
     let y;

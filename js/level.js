@@ -1,5 +1,5 @@
 /**
- * Level management for Mac the Developer game
+ * Level management, handling obstacles, collectibles, and difficulty progression
  */
 
 class Level {
@@ -43,15 +43,14 @@ class Level {
   }
 
   /**
-   * Initialize level elements
+   * Set up initial level elements
    */
   initialize() {
-    // Create parallax backgrounds
     this.createBackgrounds();
   }
 
   /**
-   * Create parallax background layers
+   * Set up parallax background layers based on the current theme
    */
   createBackgrounds() {
     let bgImage;
@@ -71,7 +70,7 @@ class Level {
         bgImage = Assets.images.backgrounds.legacy;
     }
 
-    // Create three layers of parallax backgrounds
+    // Create three layers of parallax backgrounds with different scroll speeds
     this.backgrounds = [
       new BackgroundSprite({
         image: bgImage,
@@ -107,41 +106,32 @@ class Level {
    * @returns {boolean} - True if deadline caught up with player
    */
   update(deltaTime, player) {
-    // Update level distance based on player speed
     const playerSpeed = player.getSpeed();
     this.distance += playerSpeed * (deltaTime / 1000);
 
-    // Update difficulty based on distance
     this.updateDifficulty();
 
-    // Update backgrounds
     this.backgrounds.forEach((bg) => {
       bg.update(deltaTime, playerSpeed);
     });
 
-    // Update obstacles
     this.updateObstacles(deltaTime, player);
 
-    // Update collectibles
     this.updateCollectibles(deltaTime, player);
 
-    // Update spawners
     this.updateSpawners(deltaTime);
 
-    // Update deadline
     return this.updateDeadline(deltaTime, player);
   }
 
   /**
-   * Update difficulty based on distance traveled
+   * Gradually increase difficulty based on distance traveled
+   * Starts at 1 and maxes out at 2.5 over 10000 distance units
    */
   updateDifficulty() {
-    // Gradually increase difficulty based on distance
-    // Start with difficulty 1 and max out at 2.5
     const maxDifficulty = 2.5;
     const difficultyRampUpDistance = 10000; // Distance at which to reach max difficulty
 
-    // More gradual difficulty increase
     this.difficulty =
       1 +
       Math.min(
@@ -151,7 +141,7 @@ class Level {
   }
 
   /**
-   * Update obstacle and collectible spawners
+   * Manage obstacle and collectible spawn timers
    * @param {number} deltaTime - Time since last update in ms
    */
   updateSpawners(deltaTime) {
@@ -189,7 +179,8 @@ class Level {
   }
 
   /**
-   * Spawn a new obstacle
+   * Create a new obstacle based on game progress and difficulty
+   * Handles early game restrictions and pattern generation
    */
   spawnObstacle() {
     // Calculate game time in seconds
@@ -232,7 +223,8 @@ class Level {
   }
 
   /**
-   * Spawn a pattern of obstacles
+   * Generate a predefined pattern of multiple obstacles
+   * Creates different formations that require specific player actions to avoid
    */
   spawnObstaclePattern() {
     const patternType = Utils.randomInt(0, 2);
@@ -279,7 +271,8 @@ class Level {
   }
 
   /**
-   * Spawn a new collectible
+   * Create a new collectible based on game progress
+   * Handles collectible type distribution and pattern generation
    */
   spawnCollectible() {
     // Don't spawn collectibles too early in the game
@@ -329,7 +322,8 @@ class Level {
   }
 
   /**
-   * Spawn a pattern of collectibles
+   * Generate a predefined pattern of multiple collectibles
+   * Creates different formations like rows, arcs, and trails
    */
   spawnCollectiblePattern() {
     const patternType = Utils.randomInt(0, 3);
@@ -398,43 +392,39 @@ class Level {
   }
 
   /**
-   * Draw level elements
+   * Render the level and all its components
    * @param {CanvasRenderingContext2D} ctx - Canvas context
    */
   draw(ctx) {
-    // Draw backgrounds
     this.backgrounds.forEach((bg) => {
-      bg.drawRepeating(ctx, this.width);
+      bg.draw(ctx);
     });
 
     // Draw ground
     ctx.fillStyle = "#333333";
     ctx.fillRect(0, this.groundY, this.width, this.height - this.groundY);
 
-    // Draw deadline
     this.drawDeadline(ctx);
 
-    // Draw obstacles
     this.obstacles.forEach((obstacle) => {
       obstacle.draw(ctx);
     });
 
-    // Draw collectibles
     this.collectibles.forEach((collectible) => {
       collectible.draw(ctx);
     });
   }
 
   /**
-   * Get deadline proximity as a percentage (0-100)
-   * @returns {number} - Deadline proximity percentage
+   * Calculate how close the deadline is to the player
+   * @returns {number} - Deadline proximity percentage (0-100)
    */
   getDeadlineProximity() {
     return (this.deadlinePosition / this.width) * 100;
   }
 
   /**
-   * Check if deadline has caught up with player
+   * Determine if the deadline has caught up with the player
    * @returns {boolean} - True if deadline has caught up
    */
   isDeadlineCaught() {
@@ -442,7 +432,7 @@ class Level {
   }
 
   /**
-   * Check if deadline warning should be active
+   * Check if the deadline warning indicator should be displayed
    * @returns {boolean} - True if deadline warning is active
    */
   isDeadlineWarning() {
@@ -450,7 +440,8 @@ class Level {
   }
 
   /**
-   * Reset level to initial state
+   * Reset the level to its initial state
+   * Clears all game objects and resets properties
    */
   reset() {
     // Reset level properties
@@ -474,140 +465,108 @@ class Level {
   }
 
   /**
-   * Update deadline position and check if it caught up with player
+   * Update the deadline position and check for collision with player
+   * Deadline speed adjusts based on player speed and difficulty
    * @param {number} deltaTime - Time since last update in ms
    * @param {Player} player - Player object
    * @returns {boolean} - True if deadline caught up with player
    */
   updateDeadline(deltaTime, player) {
-    // Calculate game time in seconds
-    const gameTimeSeconds = this.distance / this.speed;
+    const baseSpeed = 50; // Base speed of deadline
+    const playerSpeed = player.getSpeed();
 
-    // Deadline moves much slower in the first 15 seconds (extended grace period)
-    let deadlineSpeedMultiplier = 0.05; // Reduced from 0.1 to 0.05
+    // Deadline moves faster when player is slower, creating pressure
+    // Deadline moves slower when player is faster, giving breathing room
+    this.deadlineSpeed = (baseSpeed / playerSpeed) * this.difficulty * 0.7; // Added 0.7 multiplier to slow down deadline
 
-    if (gameTimeSeconds >= 15) {
-      // Extended from 10 to 15 seconds
-      // After grace period, deadline speed depends on player speed
-      const playerSpeed = player.getSpeed();
-      const baseSpeed = player.baseSpeed;
+    this.deadlinePosition += this.deadlineSpeed * (deltaTime / 1000);
 
-      // If player is moving at base speed, deadline slowly catches up
-      // If player is boosted, deadline falls behind
-      deadlineSpeedMultiplier =
-        (baseSpeed / playerSpeed) * this.difficulty * 0.7; // Added 0.7 multiplier to slow down deadline
-
-      // If player has coffee boost, slow down the deadline significantly
-      if (player.state.hasSpeedBoost) {
-        deadlineSpeedMultiplier *= 0.3; // Reduce deadline speed by 70% when coffee is active
-      }
-
-      // Ensure deadline always moves at least a little bit
-      deadlineSpeedMultiplier = Math.max(0.05, deadlineSpeedMultiplier); // Reduced from 0.1 to 0.05
+    if (this.deadlinePosition >= player.x - 50) {
+      return true; // Deadline caught up with player
     }
 
-    // Update deadline position
-    this.deadlinePosition +=
-      this.deadlineSpeed * deadlineSpeedMultiplier * (deltaTime / 1000);
-
-    // Check if deadline is in warning zone
-    const deadlineProximity = this.getDeadlineProximity();
-    this.deadlineWarningActive =
-      deadlineProximity >= this.deadlineWarningThreshold;
-
-    // Check if deadline caught up with player
-    return this.isDeadlineCaught();
+    return false;
   }
 
   /**
-   * Draw deadline visualization
+   * Render the deadline visual elements
    * @param {CanvasRenderingContext2D} ctx - Canvas context
    */
   drawDeadline(ctx) {
-    // Draw deadline as a vertical red line with gradient
-    const gradient = ctx.createLinearGradient(
-      this.deadlinePosition - 20,
-      0,
-      this.deadlinePosition,
-      0
-    );
+    const x = this.deadlinePosition;
+
+    // Create gradient for deadline
+    const gradient = ctx.createLinearGradient(x - 30, 0, x + 10, 0);
     gradient.addColorStop(0, "rgba(255, 0, 0, 0)");
-    gradient.addColorStop(1, "rgba(255, 0, 0, 0.7)");
+    gradient.addColorStop(0.7, "rgba(255, 0, 0, 0.7)");
+    gradient.addColorStop(1, "rgba(255, 0, 0, 0.9)");
 
     ctx.fillStyle = gradient;
-    ctx.fillRect(this.deadlinePosition - 20, 0, 20, this.height);
+    ctx.fillRect(x - 30, 0, 40, this.height);
 
     // Draw deadline line
     ctx.strokeStyle = "rgba(255, 0, 0, 0.9)";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(this.deadlinePosition, 0);
-    ctx.lineTo(this.deadlinePosition, this.height);
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, this.height);
     ctx.stroke();
 
     // Draw deadline text
     ctx.save();
-    ctx.translate(this.deadlinePosition - 10, this.height / 2);
+    ctx.translate(x - 15, this.height / 2);
     ctx.rotate(-Math.PI / 2);
-    ctx.fillStyle = "#ff0000";
-    ctx.font = "bold 16px Arial";
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 14px Arial";
     ctx.fillText("DEADLINE", 0, 0);
     ctx.restore();
   }
 
   /**
-   * Update obstacles and check for collisions
+   * Update obstacles and check for collisions with player
+   * Removes obstacles that have moved off-screen
    * @param {number} deltaTime - Time since last update in ms
    * @param {Player} player - Player object
    */
   updateObstacles(deltaTime, player) {
-    // Update each obstacle
     for (let i = this.obstacles.length - 1; i >= 0; i--) {
       const obstacle = this.obstacles[i];
-      obstacle.update(deltaTime);
+      obstacle.update(deltaTime, player.getSpeed());
 
-      // Check for collision with player
-      if (
-        obstacle.isActive &&
-        player.isActive &&
-        !player.state.isCrashed &&
-        player.isCollidingWith(obstacle)
-      ) {
-        // Apply obstacle effect to player
-        obstacle.applyEffect(player);
+      if (obstacle.x + obstacle.width < 0) {
+        this.obstacles.splice(i, 1);
+        continue;
       }
 
-      // Remove inactive obstacles
-      if (!obstacle.isActive) {
-        this.obstacles.splice(i, 1);
+      if (
+        !player.invincible &&
+        player.collidesWith(obstacle) &&
+        !player.state.isCrashed
+      ) {
+        player.crash();
       }
     }
   }
 
   /**
-   * Update collectibles and check for collisions
+   * Update collectibles and check for collisions with player
+   * Removes collectibles that have moved off-screen or been collected
    * @param {number} deltaTime - Time since last update in ms
    * @param {Player} player - Player object
    */
   updateCollectibles(deltaTime, player) {
-    // Update each collectible
     for (let i = this.collectibles.length - 1; i >= 0; i--) {
       const collectible = this.collectibles[i];
-      collectible.update(deltaTime);
+      collectible.update(deltaTime, player.getSpeed());
 
-      // Check for collision with player
-      if (
-        collectible.isActive &&
-        player.isActive &&
-        !player.state.isCrashed &&
-        player.isCollidingWith(collectible)
-      ) {
-        // Apply collectible effect to player
-        collectible.applyEffect(player);
+      if (collectible.x + collectible.width < 0) {
+        this.collectibles.splice(i, 1);
+        continue;
       }
 
-      // Remove inactive collectibles
-      if (!collectible.isActive) {
+      if (player.collidesWith(collectible) && !collectible.collected) {
+        collectible.collected = true;
+        this.game.handlePowerUpCollision(collectible);
         this.collectibles.splice(i, 1);
       }
     }

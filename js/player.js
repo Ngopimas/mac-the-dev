@@ -1,5 +1,5 @@
 /**
- * Player character for Mac the Developer game
+ * Player character
  */
 
 class Player extends Sprite {
@@ -59,9 +59,8 @@ class Player extends Sprite {
   }
 
   /**
-   * Update player state and position
+   * Updates player state and position based on elapsed time
    * @param {number} deltaTime - Time since last update in ms
-   * @param {Object} input - Input state
    */
   update(deltaTime) {
     if (this.state.isCrashed) {
@@ -69,17 +68,14 @@ class Player extends Sprite {
       this.velocityY += this.gravity * (deltaTime / 1000);
       this.y += this.velocityY * (deltaTime / 1000);
 
-      // Check if player has fallen off screen
       if (this.y > this.groundY + 200) {
         this.isActive = false;
       }
 
-      // Update collision box
       this.updateCollisionBox();
       return;
     }
 
-    // Update speed boost
     if (this.state.hasSpeedBoost) {
       this.speedBoostDuration -= deltaTime;
 
@@ -89,7 +85,6 @@ class Player extends Sprite {
       }
     }
 
-    // Update invincibility
     if (this.invincible) {
       this.invincibilityDuration -= deltaTime;
       this.invincibilityFlashTimer += deltaTime;
@@ -111,7 +106,6 @@ class Player extends Sprite {
       this.velocityY += this.gravity * (deltaTime / 1000);
     }
 
-    // Update position
     this.y += this.velocityY * (deltaTime / 1000);
 
     // Update coyote time (time window where player can still jump after leaving ground)
@@ -135,7 +129,6 @@ class Player extends Sprite {
       }
     }
 
-    // Check if player has landed after jumping
     if (this.state.isJumping && this.y >= this.groundY - this.height) {
       this.land();
     }
@@ -146,7 +139,6 @@ class Player extends Sprite {
       this.velocityY = 0;
     }
 
-    // Update sprite image based on state
     this.updateSprite();
 
     // Always update collision box
@@ -154,10 +146,9 @@ class Player extends Sprite {
   }
 
   /**
-   * Update collision box position
+   * Adjusts collision box dimensions based on player state (sliding or standing)
    */
   updateCollisionBox() {
-    // Adjust collision box based on player state
     if (this.state.isSliding) {
       this.collisionBox.x = this.x + 10;
       this.collisionBox.y = this.y + 20;
@@ -172,7 +163,7 @@ class Player extends Sprite {
   }
 
   /**
-   * Update sprite image based on player state
+   * Sets the appropriate sprite image based on current player state
    */
   updateSprite() {
     if (this.state.isCrashed) {
@@ -187,7 +178,8 @@ class Player extends Sprite {
   }
 
   /**
-   * Make the player jump
+   * Initiates a jump or buffers the jump input if in the air
+   * Handles both first jump and double jump mechanics
    */
   jump() {
     // If we're in the air and not able to double jump, buffer the jump
@@ -223,7 +215,7 @@ class Player extends Sprite {
   }
 
   /**
-   * Execute the jump (internal method)
+   * Internal method that applies jump force and updates player state
    */
   executeJump() {
     this.velocityY = this.jumpForce;
@@ -237,7 +229,7 @@ class Player extends Sprite {
   }
 
   /**
-   * Make the player slide
+   * Transitions player to sliding state with reduced hitbox height
    */
   slide() {
     if (!this.state.isJumping && !this.state.isSliding) {
@@ -250,7 +242,7 @@ class Player extends Sprite {
   }
 
   /**
-   * End the slide and return to running
+   * Transitions player from sliding back to running state
    */
   endSlide() {
     if (this.state.isSliding) {
@@ -263,7 +255,7 @@ class Player extends Sprite {
   }
 
   /**
-   * Land after jumping
+   * Resets jump-related states when player touches the ground
    */
   land() {
     this.state.isJumping = false;
@@ -274,7 +266,8 @@ class Player extends Sprite {
   }
 
   /**
-   * Crash the player
+   * Handles player collision with obstacles
+   * Uses git commits as shields if available, otherwise crashes the player
    */
   crash() {
     if (this.invincible) return; // Don't crash if invincible
@@ -301,21 +294,21 @@ class Player extends Sprite {
   }
 
   /**
-   * Collect coffee power-up
+   * Applies coffee power-up effects (speed boost)
    */
   collectCoffee() {
     this.coffeeCount++;
     this.score += 50;
     this.state.hasSpeedBoost = true;
     this.speedBoost = 300;
-    this.speedBoostDuration = 12000; // Increased from 8000 to 12000 (12 seconds)
+    this.speedBoostDuration = 12000; // 12 seconds
     if (Assets.playSfx) {
       Assets.playSfx("collect");
     }
   }
 
   /**
-   * Collect Stack Overflow power-up
+   * Applies Stack Overflow power-up effects (temporary invincibility)
    */
   collectStackOverflow() {
     this.score += 100;
@@ -327,7 +320,7 @@ class Player extends Sprite {
   }
 
   /**
-   * Collect Git Commit power-up
+   * Adds a Git Commit (acts as a shield against one crash)
    */
   collectGitCommit() {
     this.gitCommits++;
@@ -338,7 +331,7 @@ class Player extends Sprite {
   }
 
   /**
-   * Collect Code Snippet
+   * Adds a Code Snippet to the player's collection (basic score item)
    */
   collectCodeSnippet() {
     this.codeSnippets++;
@@ -349,15 +342,15 @@ class Player extends Sprite {
   }
 
   /**
-   * Get current player speed
-   * @returns {number} - Current speed
+   * Calculates the current player speed including any active boosts
+   * @returns {number} - Current speed value
    */
   getSpeed() {
     return this.baseSpeed + this.speedBoost;
   }
 
   /**
-   * Reset player to initial state
+   * Resets all player properties to their initial values
    */
   reset() {
     this.y = this.groundY - 50;

@@ -1,5 +1,5 @@
 /**
- * Sprite management for Mac the Developer game
+ * Sprite management module for handling game entities with animation and physics
  */
 
 class Sprite {
@@ -57,7 +57,7 @@ class Sprite {
   }
 
   /**
-   * Update sprite position and animation
+   * Updates sprite state including position, physics, and animation frames
    * @param {number} deltaTime - Time since last update in ms
    */
   update(deltaTime) {
@@ -89,7 +89,7 @@ class Sprite {
   }
 
   /**
-   * Draw sprite on canvas
+   * Renders the sprite to the canvas, handling both static and animated sprites
    * @param {CanvasRenderingContext2D} ctx - Canvas context
    */
   draw(ctx) {
@@ -126,7 +126,7 @@ class Sprite {
   }
 
   /**
-   * Update collision box position
+   * Synchronizes the collision box with the sprite's current position
    */
   updateCollisionBox() {
     this.collisionBox.x = this.x;
@@ -134,7 +134,7 @@ class Sprite {
   }
 
   /**
-   * Check if this sprite is colliding with another sprite
+   * Determines if this sprite's collision box overlaps with another sprite
    * @param {Sprite} otherSprite - Sprite to check collision with
    * @returns {boolean} - True if colliding, false otherwise
    */
@@ -143,7 +143,7 @@ class Sprite {
   }
 
   /**
-   * Set sprite position
+   * Moves the sprite to a new position and updates its collision box
    * @param {number} x - X position
    * @param {number} y - Y position
    */
@@ -154,7 +154,7 @@ class Sprite {
   }
 
   /**
-   * Set sprite velocity
+   * Changes the sprite's movement speed
    * @param {number} vx - X velocity
    * @param {number} vy - Y velocity
    */
@@ -164,7 +164,7 @@ class Sprite {
   }
 
   /**
-   * Reset sprite animation
+   * Resets animation to the first frame
    */
   resetAnimation() {
     this.currentFrame = 0;
@@ -173,14 +173,14 @@ class Sprite {
 }
 
 /**
- * Background sprite that can be parallax scrolled
+ * Specialized sprite for scrolling backgrounds with parallax effect
  * @extends Sprite
  */
 class BackgroundSprite extends Sprite {
   /**
    * Create a new background sprite
    * @param {Object} options - Sprite options
-   * @param {number} options.scrollSpeed - Scroll speed multiplier
+   * @param {number} options.scrollSpeed - Parallax scroll speed multiplier (default 1)
    */
   constructor(options) {
     super(options);
@@ -189,7 +189,7 @@ class BackgroundSprite extends Sprite {
   }
 
   /**
-   * Update background position for parallax scrolling
+   * Handles parallax scrolling effect based on game speed
    * @param {number} deltaTime - Time since last update in ms
    * @param {number} gameSpeed - Current game speed
    */
@@ -204,7 +204,7 @@ class BackgroundSprite extends Sprite {
   }
 
   /**
-   * Update method to match the interface used in level.js
+   * Override of parent update method to support parallax scrolling
    * @param {number} deltaTime - Time since last update in ms
    * @param {number} gameSpeed - Current game speed
    */
@@ -213,9 +213,9 @@ class BackgroundSprite extends Sprite {
   }
 
   /**
-   * Draw repeating background
+   * Draws multiple instances of the background to create infinite scrolling effect
    * @param {CanvasRenderingContext2D} ctx - Canvas context
-   * @param {number} canvasWidth - Canvas width
+   * @param {number} canvasWidth - Width of the canvas to determine how many instances to draw
    */
   drawRepeating(ctx, canvasWidth) {
     if (!this.isVisible) return;

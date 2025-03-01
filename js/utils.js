@@ -1,11 +1,11 @@
 /**
- * Utility functions for Mac the Developer game
+ * Utility functions
  */
 
 class Utils {
   /**
-   * Get high score from local storage
-   * @returns {number} High score
+   * Retrieves the stored high score from local storage
+   * @returns {number} The current high score or 0 if none exists
    */
   static getHighScore() {
     const highScore = localStorage.getItem("MacDevHighScore");
@@ -13,8 +13,9 @@ class Utils {
   }
 
   /**
-   * Set high score in local storage
-   * @param {number} score - Score to save
+   * Updates the high score in local storage if the new score is higher
+   * @param {number} score - The score to compare with the current high score
+   * @returns {boolean} True if a new high score was set, false otherwise
    */
   static setHighScore(score) {
     const currentHighScore = this.getHighScore();
@@ -26,18 +27,26 @@ class Utils {
   }
 
   /**
-   * Format number with commas for display
+   * Adds thousands separators to numbers for better readability
    * @param {number} num - Number to format
-   * @returns {string} Formatted number
+   * @returns {string} Formatted number with commas
    */
   static formatNumber(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
 
   /**
-   * Check if two rectangles overlap (collision detection)
-   * @param {Object} rect1 - First rectangle {x, y, width, height}
-   * @param {Object} rect2 - Second rectangle {x, y, width, height}
+   * Determines if two rectangles overlap for collision detection
+   * @param {Object} rect1 - First rectangle
+   * @param {number} rect1.x - X coordinate of first rectangle
+   * @param {number} rect1.y - Y coordinate of first rectangle
+   * @param {number} rect1.width - Width of first rectangle
+   * @param {number} rect1.height - Height of first rectangle
+   * @param {Object} rect2 - Second rectangle
+   * @param {number} rect2.x - X coordinate of second rectangle
+   * @param {number} rect2.y - Y coordinate of second rectangle
+   * @param {number} rect2.width - Width of second rectangle
+   * @param {number} rect2.height - Height of second rectangle
    * @returns {boolean} True if rectangles overlap
    */
   static checkCollision(rect1, rect2) {
@@ -50,7 +59,7 @@ class Utils {
   }
 
   /**
-   * Calculate distance between two points
+   * Calculates the Euclidean distance between two points
    * @param {number} x1 - X coordinate of first point
    * @param {number} y1 - Y coordinate of first point
    * @param {number} x2 - X coordinate of second point
@@ -64,9 +73,9 @@ class Utils {
   }
 
   /**
-   * Get random integer between min and max (inclusive)
-   * @param {number} min - Minimum value
-   * @param {number} max - Maximum value
+   * Generates a random integer within a specified range
+   * @param {number} min - Minimum value (inclusive)
+   * @param {number} max - Maximum value (inclusive)
    * @returns {number} Random integer
    */
   static randomInt(min, max) {
@@ -74,8 +83,8 @@ class Utils {
   }
 
   /**
-   * Detect mobile device
-   * @returns {boolean} True if mobile device
+   * Checks if the user is on a mobile device based on user agent
+   * @returns {boolean} True if on a mobile device
    */
   static isMobileDevice() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -84,16 +93,16 @@ class Utils {
   }
 
   /**
-   * Detect touch screen
-   * @returns {boolean} True if touch screen
+   * Determines if the device has touch capabilities
+   * @returns {boolean} True if touch is supported
    */
   static isTouchScreen() {
     return "ontouchstart" in window || navigator.maxTouchPoints > 0;
   }
 
   /**
-   * Preload images
-   * @param {string[]} urls - Array of image URLs
+   * Loads multiple images in advance to prevent rendering delays
+   * @param {string[]} urls - Array of image URLs to preload
    * @returns {Promise} Promise that resolves when all images are loaded
    */
   static preloadImages(urls) {
@@ -109,20 +118,20 @@ class Utils {
   }
 
   /**
-   * Ease in out function for smooth animations
-   * @param {number} t - Current time (0-1)
-   * @returns {number} Eased value
+   * Provides a smooth transition curve for animations
+   * @param {number} t - Current time/progress (0-1)
+   * @returns {number} Eased value for smoother animation
    */
   static easeInOut(t) {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
   }
 
   /**
-   * Clamp value between min and max
-   * @param {number} value - Value to clamp
-   * @param {number} min - Minimum value
-   * @param {number} max - Maximum value
-   * @returns {number} Clamped value
+   * Restricts a value to be within a specified range
+   * @param {number} value - Value to constrain
+   * @param {number} min - Minimum allowed value
+   * @param {number} max - Maximum allowed value
+   * @returns {number} Value constrained between min and max
    */
   static clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);

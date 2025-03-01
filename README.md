@@ -1,6 +1,6 @@
 # Mac the Developer
 
-A browser-based endless runner game that reimagines the classic Mac gameplay within a software development theme. Players control a developer character racing against deadlines while collecting coffee cups for speed boosts and avoiding bugs and technical obstacles.
+A browser-based endless runner game that reimagines the classic Mac gameplay within a software development theme. Players control a developer character racing against deadlines while collecting power-ups and avoiding bugs and technical obstacles.
 
 ## Play the Game
 
@@ -11,58 +11,101 @@ A browser-based endless runner game that reimagines the classic Mac gameplay wit
 
 ## Game Controls
 
-- **Jump**: Click, tap, Space bar, or Up arrow
-- **Double Jump**: Double-click, double-tap, or press Space/Up twice quickly
-- **Slide**: Press Down arrow, click in the bottom third of the screen, or tap the bottom part of the screen on mobile
-- **Mouse Control**: Click and hold in the bottom third of the screen to slide, upper part to jump
-- **Pause**: Press P or Escape key
-- **Help**: Click the "?" button in the top-right corner or press H key
-- **Restart**: Press Space or Enter key when game over, or click the "TRY AGAIN" button
+### Desktop Controls
+
+- **Jump**: Space bar, Up arrow, or click in the upper zone of the screen
+- **Double Jump**: Press Space/Up twice quickly or double-click in the upper zone
+- **Slide**: Down arrow or click in the lower zone of the screen
+- **Pause**: Press P, Escape key, or click the pause button (⏸️)
+- **Help**: Click the "?" button or press H key
+- **Restart**: Press Space/Enter when game over, or click "TRY AGAIN"
+
+### Mobile Controls
+
+- **Jump**: Tap the upper control zone
+- **Double Jump**: Double-tap the upper control zone
+- **Slide**: Tap and hold the lower control zone
+- Visual indicators show the jump and slide zones for easy control
 
 ## Features
 
-- Endless runner gameplay with increasing difficulty
+- Endless runner gameplay with progressive difficulty
 - Software development themed obstacles and collectibles
-- Speed boosts from coffee that also slow down the deadline
-- Invincibility from Stack Overflow answers
-- Checkpoints from Git commits
-- Points from code snippets
+- Responsive controls for both desktop and mobile devices
+- Visual feedback for all game actions
+- Speed boosts and power-ups
 - Deadline mechanic that approaches if you slow down
-- Always-available help button that pauses the game
-- Quick restart with keyboard after game over
-- Beginner-friendly first 15 seconds with reduced difficulty
-- Visual distinction between collectibles (circles) and obstacles (rectangles)
+- High score tracking with local storage
+- Pause functionality with on-screen controls
+- Comprehensive help screen with game instructions
+- Beginner-friendly first phase with reduced difficulty
 
 ## Game Elements
 
-### Collectibles (Collect These - Circular Shapes)
+### Collectibles (With Visual Indicators)
 
-- **Coffee Cups** (Brown Circle): Provide speed boost for 12 seconds and slow down the deadline
-- **Stack Overflow Answers** (Orange Circle): Grant temporary invincibility
-- **Git Commits** (Green Circle): Serve as checkpoints if player dies
-- **Code Snippets** (White Circle): Basic scoring item
+- **Coffee (☕)**: Speed boost power-up that also slows down the deadline
+  - Unique bobbing animation for visibility
+  - Temporary speed increase effect
+- **Stack Overflow (🛡️)**: Grants temporary invincibility
+  - Pulsing visual effect
+  - Protection from obstacles
+- **Git Commits (📌)**: Bonus points
+  - Rotating animation
+  - Score multiplier
+- **Code Snippets (💻)**: Basic scoring items
+  - Clear visual indicator
+  - Points reward
 
-### Obstacles (Avoid These - Rectangular Shapes)
+### Obstacles (Avoid These)
 
-- **Bugs** (Red Rectangle): Moving enemies that crash your character
-- **Merge Conflicts** (Orange-Red Rectangle): Larger obstacles that crash your character
-- **Meetings** (Dark Red Rectangle): Slow the player down if hit
-- **Technical Debt** (Dark Red Rectangle): Grows larger over time and crashes your character
+- **Bugs (🐛)**: Moving enemies that crash your character
+  - Variable movement patterns
+  - Instant game over on collision
+- **Merge Conflicts (⚠️)**: Large obstacles that must be avoided
+  - Distinct warning visuals
+  - Blocks player progress
+- **Meetings (👥)**: Slow down the player when hit
+  - Temporary speed reduction
+  - Can be recovered from
+- **Technical Debt (🧶)**: Complex obstacle with growing impact
+  - Progressive difficulty
+  - Must be avoided
 
 ## Gameplay Tips
 
-- The game starts with a 15-second grace period where obstacles are fewer and the deadline moves very slowly
-- After the initial grace period, difficulty gradually increases
-- Circular objects are always beneficial - collect them!
-- Rectangular objects with warning stripes are harmful - avoid them!
-- Coffee is especially valuable as it both speeds you up AND slows down the deadline
+- Watch for visual cues that indicate collectible types
+- Use the dedicated control zones for precise movement
+- Coffee power-ups are crucial for maintaining speed
+- Stack Overflow invincibility can help in tight situations
+- Monitor the deadline bar to maintain your pace
+- Use the pause feature (⏸️) when needed
+- Check the help screen (?) for detailed instructions
 
-## Technical Details
+## Technical Implementation
 
-- Built with vanilla JavaScript, HTML5 Canvas, and CSS
-- No external libraries or frameworks required
-- Responsive design works on both desktop and mobile devices
-- Local storage for saving high scores
+- Built with vanilla JavaScript and HTML5 Canvas
+- Responsive design with dedicated mobile controls
+- Sprite-based animation system
+- Local storage for high score persistence
+- Optimized for both touch and mouse/keyboard input
+- Clean separation of game components (UI, physics, controls)
+- No external dependencies required
+
+## Development
+
+The game is structured into multiple JavaScript modules:
+
+- `main.js`: Game initialization and setup
+- `game.js`: Core game loop and state management
+- `player.js`: Player character controls and physics
+- `collectibles.js`: Power-up and scoring items
+- `obstacles.js`: Obstacle generation and behavior
+- `level.js`: Level design and difficulty progression
+- `ui.js`: User interface and HUD elements
+- `assets.js`: Game assets and resource management
+- `utils.js`: Utility functions
+- `sprites.js`: Sprite animation system
 
 ## License
 
@@ -70,4 +113,4 @@ This project is open source and available under the MIT License.
 
 ## Credits
 
-Created as a fun little project for developers who need a quick break from coding!
+Created as a fun project to combine coding themes with classic endless runner gameplay. Perfect for developers who need a quick break from actual coding!

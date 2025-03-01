@@ -1,13 +1,15 @@
 /**
- * Collectibles for Mac the Developer game
+ * Game collectible items with different behaviors and effects
  */
 
 class Collectible extends Sprite {
   /**
    * Create a new collectible
    * @param {Object} options - Collectible options
-   * @param {string} options.type - Collectible type
-   * @param {number} options.speed - Collectible speed
+   * @param {string} options.type - Type of collectible (coffee, stackOverflow, gitCommit, codeSnippet)
+   * @param {number} options.speed - Horizontal movement speed
+   * @param {number} [options.x=800] - Initial x position
+   * @param {number} [options.y=0] - Initial y position
    */
   constructor(options) {
     const type = options.type || "codeSnippet";
@@ -51,7 +53,6 @@ class Collectible extends Sprite {
 
     this.type = type;
     this.velocityX = -(options.speed || 300);
-    // this.isVisible = true;
 
     // Adjust collision box to be slightly smaller than sprite
     this.collisionBox = {
@@ -69,7 +70,7 @@ class Collectible extends Sprite {
   }
 
   /**
-   * Set up special properties based on collectible type
+   * Initialize special movement and visual properties based on collectible type
    */
   setupSpecialProperties() {
     switch (this.type) {
@@ -103,7 +104,7 @@ class Collectible extends Sprite {
 
   /**
    * Update collectible position and special behaviors
-   * @param {number} deltaTime - Time since last update in ms
+   * @param {number} deltaTime - Time since last update in milliseconds
    */
   update(deltaTime) {
     super.update(deltaTime);
@@ -135,8 +136,6 @@ class Collectible extends Sprite {
         break;
 
       case "codeSnippet":
-        // No sparkle effect - codeSnippet remains fully visible at all times
-        this.isVisible = true;
         break;
     }
 
@@ -207,14 +206,7 @@ class Collectible extends Sprite {
    * @param {CanvasRenderingContext2D} ctx - Canvas context
    */
   draw(ctx) {
-    if (!this.isVisible) return;
-
     ctx.save();
-
-    // Remove opacity effect for codeSnippet
-    // if (this.type === "codeSnippet" && this.opacity !== undefined) {
-    //   ctx.globalAlpha = this.opacity;
-    // }
 
     // Apply rotation for git commits
     if (this.type === "gitCommit" && this.rotation) {
@@ -264,39 +256,34 @@ class Collectible extends Sprite {
 }
 
 /**
- * Collectible factory for creating different types of collectibles
+ * Factory for creating different types of collectibles with appropriate positioning
  */
 const CollectibleFactory = {
   /**
-   * Create a random collectible
+   * Create a random collectible with weighted probability
    * @param {number} speed - Base speed for the collectible
    * @param {number} groundY - Y position of the ground
    * @returns {Collectible} - New collectible instance
    */
   createRandom: function (speed, groundY) {
-    // Weighted random selection
     const rand = Math.random();
     let type;
 
     if (rand < 0.6) {
-      // 60% chance for code snippets
-      type = "codeSnippet";
+      type = "codeSnippet"; // 60% chance
     } else if (rand < 0.85) {
-      // 25% chance for coffee
-      type = "coffee";
+      type = "coffee"; // 25% chance
     } else if (rand < 0.95) {
-      // 10% chance for Stack Overflow
-      type = "stackOverflow";
+      type = "stackOverflow"; // 10% chance
     } else {
-      // 5% chance for Git commit
-      type = "gitCommit";
+      type = "gitCommit"; // 5% chance
     }
 
     return this.create(type, speed, groundY);
   },
 
   /**
-   * Create a specific type of collectible
+   * Create a specific type of collectible with appropriate vertical positioning
    * @param {string} type - Collectible type
    * @param {number} speed - Base speed for the collectible
    * @param {number} groundY - Y position of the ground
@@ -339,12 +326,12 @@ const CollectibleFactory = {
   },
 
   /**
-   * Create a row of code snippets
+   * Create a horizontal row of code snippets with even spacing
    * @param {number} speed - Base speed for the collectibles
    * @param {number} groundY - Y position of the ground
    * @param {number} count - Number of snippets to create
    * @param {number} startX - Starting X position
-   * @param {number} y - Y position for the row
+   * @param {number} y - Y position for the row (optional)
    * @returns {Collectible[]} - Array of collectibles
    */
   createCodeSnippetRow: function (speed, groundY, count, startX, y) {

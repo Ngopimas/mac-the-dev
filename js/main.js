@@ -1,5 +1,6 @@
 /**
- * Main entry point for Mac the Developer game
+ * Main entry point for the game application.
+ * Initializes the game and sets up visual feedback effects.
  */
 
 // Wait for DOM to be fully loaded
@@ -7,12 +8,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // Create and initialize game
   const game = new Game();
 
-  // Add CSS effects for visual feedback
+  // Set up visual feedback animations
   addCssEffects();
 });
 
 /**
- * Add CSS effects for visual feedback
+ * Adds CSS animations for providing visual feedback during gameplay.
+ * Creates animations for flash, shake, and slow motion effects that
+ * can be applied to elements by adding the corresponding CSS classes.
  */
 function addCssEffects() {
   // Create a style element

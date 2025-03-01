@@ -1,20 +1,18 @@
 /**
- * Main game logic for Mac the Developer game
+ * Main game logic for the developer-themed endless runner game
  */
 
 class Game {
   /**
-   * Create a new game instance
+   * Creates and initializes a new game instance with all required components
    */
   constructor() {
-    // Game canvas
     this.canvas = document.getElementById("game-canvas");
     this.ctx = this.canvas.getContext("2d");
 
-    // Set canvas size
     this.resizeCanvas();
 
-    // Game state
+    // Game state tracking
     this.state = {
       isRunning: false,
       isPaused: false,
@@ -52,37 +50,30 @@ class Game {
     this.accumulatedTime = 0;
     this.timeStep = 1000 / 60; // Target 60 FPS
 
-    // Initialize game
     this.initialize();
   }
 
   /**
-   * Initialize game
+   * Initializes game assets, event listeners, and UI
    */
   async initialize() {
     try {
-      // Load assets
       await Assets.loadAll();
 
-      // Set up event listeners
       this.setupEventListeners();
 
-      // Set up UI buttons
       this.ui.setupButtons({
         onStart: () => this.startGame(),
         onRestart: () => this.restartGame(),
       });
 
-      // Handle window resize
       window.addEventListener("resize", () => this.resizeCanvas());
 
-      // Debug mode (for development)
       window.DEBUG_MODE = false;
 
       console.log("Game initialized successfully");
     } catch (error) {
       console.error("Error initializing game:", error);
-      // Display error message to user
       alert(
         "There was an error loading the game. Please refresh the page and try again."
       );
@@ -90,7 +81,7 @@ class Game {
   }
 
   /**
-   * Set up event listeners for player input
+   * Sets up event listeners for keyboard, mouse, and touch inputs
    */
   setupEventListeners() {
     // Keyboard events
@@ -126,7 +117,6 @@ class Game {
 
         case "?":
         case "h":
-          // Show instructions and pause the game
           this.showInstructions();
           break;
       }
@@ -148,7 +138,6 @@ class Game {
       if (!this.state.isRunning || this.state.isPaused) return;
       e.preventDefault(); // Prevent default behavior
 
-      // Get mouse position
       const rect = this.canvas.getBoundingClientRect();
       const y = e.clientY - rect.top;
 
@@ -161,7 +150,6 @@ class Game {
       }
     });
 
-    // Add mouseup event to end sliding
     this.canvas.addEventListener("mouseup", (e) => {
       if (!this.state.isRunning || this.state.isPaused) return;
       e.preventDefault(); // Prevent default behavior
@@ -173,12 +161,10 @@ class Game {
       }
     });
 
-    // Add mousemove event to handle sliding when mouse moves to bottom of screen while pressed
     this.canvas.addEventListener("mousemove", (e) => {
       if (!this.state.isRunning || this.state.isPaused) return;
       if (e.buttons !== 1) return; // Only process if mouse button is pressed
 
-      // Get mouse position
       const rect = this.canvas.getBoundingClientRect();
       const y = e.clientY - rect.top;
 
@@ -200,7 +186,6 @@ class Game {
         if (!this.state.isRunning || this.state.isPaused) return;
         e.preventDefault(); // Prevent default behavior
 
-        // Get touch position
         const touch = e.touches[0];
         const rect = this.canvas.getBoundingClientRect();
         const y = touch.clientY - rect.top;
@@ -225,7 +210,6 @@ class Game {
         if (!this.state.isRunning || this.state.isPaused) return;
         e.preventDefault(); // Prevent default behavior
 
-        // Get current touch position
         const touch = e.touches[0];
         const rect = this.canvas.getBoundingClientRect();
         const y = touch.clientY - rect.top;
@@ -258,7 +242,6 @@ class Game {
       { passive: false }
     );
 
-    // Add help button event listener
     const helpButton = document.getElementById("help-button");
     if (helpButton) {
       helpButton.addEventListener("click", () => {
@@ -266,7 +249,6 @@ class Game {
       });
     }
 
-    // Add back button event listener to return from instructions to game
     const backButton = document.getElementById("back-button");
     if (backButton) {
       backButton.addEventListener("click", () => {
@@ -279,7 +261,6 @@ class Game {
       });
     }
 
-    // Add pause/resume button event listener
     const pauseButton = document.getElementById("pause-button");
     if (pauseButton) {
       pauseButton.addEventListener("click", () => {
@@ -289,7 +270,7 @@ class Game {
   }
 
   /**
-   * Handle jump input (including double jump detection)
+   * Handles jump input with double jump detection
    */
   handleJump() {
     if (!this.player || this.state.isPaused) return;
@@ -311,7 +292,7 @@ class Game {
   }
 
   /**
-   * Start a new game
+   * Starts a new game by initializing player, level, and game state
    */
   startGame() {
     // Reset game state
@@ -336,19 +317,16 @@ class Game {
       gameContainer.classList.add("playing");
     }
 
-    // Create player
     this.player = new Player({
       groundY: this.canvas.height - 50,
     });
 
-    // Create level
     this.level = new Level({
       theme: "startup",
       width: this.canvas.width,
       height: this.canvas.height,
     });
 
-    // Show game UI
     this.ui.showScreen("game");
 
     // Start game loop
@@ -363,28 +341,25 @@ class Game {
       this.gameLoop(timestamp)
     );
 
-    // Play background music
     if (Assets.playMusic) {
       Assets.playMusic("main");
     }
   }
 
   /**
-   * Restart the game after game over
+   * Restarts the game after game over
    */
   restartGame() {
-    // Cancel any existing animation frame
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
     }
 
-    // Start a new game
     this.startGame();
   }
 
   /**
-   * Toggle pause state
+   * Toggles the pause state of the game
    */
   togglePause() {
     if (!this.state.isRunning || this.state.isGameOver) return;
@@ -392,24 +367,20 @@ class Game {
     this.state.isPaused = !this.state.isPaused;
 
     if (this.state.isPaused) {
-      // Show pause message
       const pauseMessage = document.getElementById("pause-message");
       if (pauseMessage) {
         pauseMessage.classList.remove("hidden");
       }
 
-      // Pause music
       if (Assets.stopMusic) {
         Assets.stopMusic();
       }
     } else {
-      // Hide pause message
       const pauseMessage = document.getElementById("pause-message");
       if (pauseMessage) {
         pauseMessage.classList.add("hidden");
       }
 
-      // Resume music
       if (Assets.playMusic) {
         Assets.playMusic("main");
       }
@@ -421,19 +392,18 @@ class Game {
   }
 
   /**
-   * Show instructions and pause the game
+   * Shows instructions screen and pauses the game
    */
   showInstructions() {
     if (this.state.isRunning && !this.state.isPaused) {
       this.state.isPaused = true;
     }
 
-    // Show instructions screen
     this.ui.showScreen("instructions");
   }
 
   /**
-   * End the game
+   * Ends the game and shows game over screen
    */
   endGame() {
     if (this.state.isGameOver) return;
@@ -441,57 +411,46 @@ class Game {
     this.state.isRunning = false;
     this.state.isGameOver = true;
 
-    // Remove playing class from game container
     const gameContainer = document.getElementById("game-container");
     if (gameContainer) {
       gameContainer.classList.remove("playing");
     }
 
-    // Check for high score
     const isNewHighScore = Utils.setHighScore(this.state.score);
 
-    // Update the game state with the latest high score
     this.state.highScore = Utils.getHighScore();
 
-    // Show game over screen
     this.ui.showGameOver(
       this.state.score,
       this.state.highScore,
       isNewHighScore
     );
 
-    // Show restart hint for keyboard users
     this.ui.showRestartHint();
 
-    // Play game over sound
     if (Assets.playSfx) {
       Assets.playSfx("gameOver");
     }
 
-    // Stop background music
     if (Assets.stopMusic) {
       Assets.stopMusic();
     }
 
-    // Add confetti effect for new high score
     if (isNewHighScore) {
       this.ui.addEffect("confetti", 3000);
     }
   }
 
   /**
-   * Main game loop
+   * Main game loop that handles timing and rendering
    * @param {number} timestamp - Current timestamp from requestAnimationFrame
    */
   gameLoop(timestamp) {
-    // Calculate time since last frame
     const deltaTime = timestamp - this.lastFrameTime;
     this.lastFrameTime = timestamp;
 
-    // Accumulate time for fixed time step
     this.accumulatedTime += deltaTime;
 
-    // Update game state at fixed intervals
     while (this.accumulatedTime >= this.timeStep) {
       if (!this.state.isPaused) {
         this.update(this.timeStep);
@@ -499,10 +458,8 @@ class Game {
       this.accumulatedTime -= this.timeStep;
     }
 
-    // Render game
     this.render();
 
-    // Continue game loop if game is running
     if (this.state.isRunning) {
       this.animationFrameId = requestAnimationFrame((timestamp) =>
         this.gameLoop(timestamp)
@@ -511,40 +468,33 @@ class Game {
   }
 
   /**
-   * Update game state
+   * Updates game state, player, level, and power-ups
    * @param {number} deltaTime - Time since last update in ms
    */
   update(deltaTime) {
     if (!this.player || !this.level) return;
 
-    // Update player
     this.player.update(deltaTime);
 
-    // Update level and check if deadline caught up
     const isDeadlineCaught = this.level.update(deltaTime, this.player);
 
-    // Check if player is still active
     if (!this.player.isActive || isDeadlineCaught) {
       this.endGame();
       return;
     }
 
-    // Update score based on distance traveled
     this.state.score = Math.floor(this.level.distance) + this.player.score;
 
-    // Update power-ups
     this.updatePowerUps(deltaTime);
 
-    // Update UI
     this.updateUI();
   }
 
   /**
-   * Update power-up states
+   * Updates power-up states and durations
    * @param {number} deltaTime - Time since last update in ms
    */
   updatePowerUps(deltaTime) {
-    // Update coffee boost
     if (this.player.state.hasSpeedBoost) {
       this.state.coffeeBoost = (this.player.speedBoostDuration / 12000) * 100;
       this.state.powerUps.coffee = this.player.speedBoostDuration;
@@ -553,25 +503,21 @@ class Game {
       this.state.powerUps.coffee = 0;
     }
 
-    // Update invincibility
     if (this.player.invincible) {
       this.state.powerUps.invincibility = this.player.invincibilityDuration;
     } else {
       this.state.powerUps.invincibility = 0;
     }
 
-    // Update git commits
     this.state.powerUps.gitCommits = this.player.gitCommits;
 
-    // Update deadline proximity
     this.state.deadlineProximity = this.level.getDeadlineProximity();
   }
 
   /**
-   * Update UI elements
+   * Updates UI elements with current game state
    */
   updateUI() {
-    // Update HUD
     this.ui.updateHUD({
       score: this.state.score,
       coffeeBoost: this.state.coffeeBoost,
@@ -579,37 +525,32 @@ class Game {
       powerUps: this.state.powerUps,
     });
 
-    // Add warning effect when deadline is close
     if (this.level.isDeadlineWarning()) {
       this.ui.addEffect("flash", 500);
     }
   }
 
   /**
-   * Render game
+   * Renders the game by drawing level and player
    */
   render() {
-    // Clear canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Render level
     if (this.level) {
       this.level.draw(this.ctx);
     }
 
-    // Render player
     if (this.player) {
       this.player.draw(this.ctx);
     }
 
-    // Draw debug info if debug mode is enabled
     if (window.DEBUG_MODE) {
       this.drawDebugInfo();
     }
   }
 
   /**
-   * Draw debug information
+   * Draws debug information when DEBUG_MODE is enabled
    */
   drawDebugInfo() {
     this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
@@ -640,30 +581,25 @@ class Game {
   }
 
   /**
-   * Resize canvas to fit window
+   * Resizes canvas to fit window and updates ground positions
    */
   resizeCanvas() {
-    // Get container dimensions
     const container = document.getElementById("game-container");
     if (!container) return;
 
     const containerWidth = container.clientWidth;
     const containerHeight = container.clientHeight;
 
-    // Set canvas size
     this.canvas.width = containerWidth;
     this.canvas.height = containerHeight;
 
-    // Update ground position if level exists
     if (this.level) {
       this.level.groundY = this.canvas.height - 50;
     }
 
-    // Update player position if player exists
     if (this.player) {
       this.player.groundY = this.canvas.height - 50;
 
-      // If player is on the ground, update Y position
       if (!this.player.state.isJumping) {
         this.player.y = this.player.groundY - this.player.height;
       }
@@ -671,8 +607,8 @@ class Game {
   }
 
   /**
-   * Handle power-up collision
-   * @param {string} powerUpType - Type of power-up collected
+   * Handles power-up collision effects
+   * @param {Object} powerUp - The power-up object that was collected
    */
   handlePowerUpCollision(powerUp) {
     if (!this.player) return;
@@ -700,7 +636,8 @@ class Game {
   }
 
   /**
-   * Use a git commit to save the player
+   * Uses a git commit to provide temporary invincibility
+   * @returns {boolean} Whether a git commit was successfully used
    */
   useGitCommit() {
     if (this.player && this.player.gitCommits > 0) {

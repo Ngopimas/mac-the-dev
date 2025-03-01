@@ -1,10 +1,10 @@
 /**
- * UI management for Mac the Developer game
+ * Manages all UI elements and interactions
  */
 
 class UI {
   /**
-   * Create a new UI manager
+   * Initializes UI manager and references to DOM elements
    */
   constructor() {
     // UI elements
@@ -47,7 +47,8 @@ class UI {
   }
 
   /**
-   * Initialize UI elements and event listeners
+   * Sets up initial UI state, creates missing elements if needed,
+   * and ensures high score is displayed
    */
   initialize() {
     // Show start screen
@@ -100,7 +101,7 @@ class UI {
   }
 
   /**
-   * Create power-up indicators in the HUD
+   * Creates visual indicators for active power-ups in the HUD
    */
   createPowerUpIndicators() {
     // Check if power-up indicators container exists
@@ -141,7 +142,7 @@ class UI {
   }
 
   /**
-   * Set up button event listeners
+   * Attaches event listeners to UI buttons
    * @param {Object} callbacks - Callback functions
    * @param {Function} callbacks.onStart - Called when start button is clicked
    * @param {Function} callbacks.onRestart - Called when restart button is clicked
@@ -177,7 +178,7 @@ class UI {
   }
 
   /**
-   * Show a specific screen and hide others
+   * Shows a specific screen and hides all others
    * @param {string} screenName - Name of screen to show ('start', 'game', 'gameOver', 'instructions')
    */
   showScreen(screenName) {
@@ -219,12 +220,15 @@ class UI {
   }
 
   /**
-   * Update HUD elements
+   * Updates all HUD elements based on current game state
    * @param {Object} gameState - Current game state
    * @param {number} gameState.score - Player score
    * @param {number} gameState.coffeeBoost - Coffee boost percentage (0-100)
    * @param {number} gameState.deadlineProximity - Deadline proximity percentage (0-100)
    * @param {Object} [gameState.powerUps] - Power-up states
+   * @param {number} [gameState.powerUps.coffee] - Remaining coffee boost time in ms
+   * @param {number} [gameState.powerUps.invincibility] - Remaining invincibility time in ms
+   * @param {number} [gameState.powerUps.gitCommits] - Number of git commits available
    */
   updateHUD(gameState) {
     // Update score
@@ -301,7 +305,7 @@ class UI {
   }
 
   /**
-   * Update high score display
+   * Updates the high score display element
    * @param {number} highScore - High score to display
    */
   updateHighScore(highScore) {
@@ -311,7 +315,7 @@ class UI {
   }
 
   /**
-   * Show game over screen with final score
+   * Displays game over screen with final score and high score information
    * @param {number} score - Final score
    * @param {number} highScore - High score
    * @param {boolean} isNewHighScore - Whether this is a new high score
@@ -339,9 +343,9 @@ class UI {
   }
 
   /**
-   * Add a visual effect to the screen
+   * Applies a visual effect to the game container
    * @param {string} effectType - Type of effect ('flash', 'shake', 'slowmo', 'celebration')
-   * @param {number} duration - Effect duration in ms
+   * @param {number} duration - Effect duration in milliseconds
    */
   addEffect(effectType, duration) {
     const container = document.getElementById("game-container");
@@ -385,7 +389,9 @@ class UI {
   }
 
   /**
-   * Create confetti effect for celebration
+   * Creates animated confetti particles for celebration effects
+   * Generates 50 randomly colored and positioned particles that
+   * automatically remove themselves after animation completes
    */
   createConfetti() {
     const container = document.getElementById("game-container");
@@ -416,14 +422,15 @@ class UI {
   }
 
   /**
-   * Show game UI and hide other screens
+   * Convenience method to display the game UI
+   * Hides all other screens and shows the game screen
    */
   showGameUI() {
     this.showScreen("game");
   }
 
   /**
-   * Hide game over screen
+   * Hides the game over screen and any associated elements
    */
   hideGameOver() {
     this.gameOverScreen.classList.add("hidden");
@@ -436,7 +443,8 @@ class UI {
   }
 
   /**
-   * Show restart hint on game over screen
+   * Makes the restart hint visible on the game over screen
+   * Used to indicate to the player they can restart the game
    */
   showRestartHint() {
     if (this.restartHintElement) {
