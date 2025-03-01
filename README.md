@@ -2,6 +2,10 @@
 
 A browser-based endless runner game that reimagines the classic Mac gameplay within a software development theme. Players control a developer character racing against deadlines while collecting power-ups and avoiding bugs and technical obstacles.
 
+Created as a fun project to combine coding themes with classic endless runner gameplay. Perfect for developers who need a quick break from actual coding!
+
+![Mac the Developer](./mac-the-developer.png)
+
 ## Play the Game
 
 1. Clone this repository
@@ -110,7 +114,3 @@ The game is structured into multiple JavaScript modules:
 ## License
 
 This project is open source and available under the MIT License.
-
-## Credits
-
-Created as a fun project to combine coding themes with classic endless runner gameplay. Perfect for developers who need a quick break from actual coding!
