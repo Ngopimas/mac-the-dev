@@ -98,14 +98,33 @@ body {
 /* Instructions Screen */
 #instructions-screen {
   background-color: rgba(0, 0, 0, 0.95);
-  padding: 20px;
+  padding: 40px 20px 20px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  max-height: 100%;
+}
+
+/* Container for instructions content to maintain consistent width */
+#instructions-screen .content-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 #instructions-screen h2 {
   font-size: 24px;
   margin: 15px 0 10px;
   color: #ffcc00;
+  position: sticky;
+  top: 0;
+  background-color: rgba(0, 0, 0, 0.95);
+  width: 100%;
+  padding: 10px 0;
+  z-index: 1;
+  text-align: center;
 }
 
 #instructions-screen h3 {
@@ -119,16 +138,24 @@ body {
   font-size: 1.2rem;
   margin-bottom: 10px;
   color: #ffffff;
+  text-align: left;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 #instructions-screen ul {
   text-align: left;
-  margin: 0 auto;
-  max-width: 500px;
+  width: 100%;
+  padding-left: 30px;
+  list-style-position: outside;
+  margin: 0;
 }
 
 #instructions-screen li {
   margin-bottom: 10px;
+  text-align: left;
+  padding-left: 5px;
 }
 
 /* Legend Styles */
@@ -631,8 +658,26 @@ button:active {
     padding: 8px 16px;
     font-size: 16px;
   }
+  #instructions-screen {
+    padding: 60px 20px 20px;
+    justify-content: flex-start;
+    align-items: center;
+    height: 100%;
+  }
+  #instructions-screen .content-container {
+    max-width: 90%;
+  }
   #instructions-screen ul {
     max-width: 90%;
+    padding-left: 25px;
+    list-style-position: outside;
+  }
+  #instructions-screen h2 {
+    font-size: 20px;
+    padding: 15px 0;
+  }
+  #instructions-screen li {
+    margin-bottom: 15px;
   }
 }
 
@@ -640,4 +685,12 @@ button:active {
   #game-container {
     height: 100vh;
   }
+}
+
+/* Back button in instructions screen */
+#back-button {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 2;
 }
