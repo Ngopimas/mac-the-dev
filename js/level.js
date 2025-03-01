@@ -9,11 +9,13 @@ class Level {
    * @param {string} options.theme - Level theme ('legacy', 'startup', or 'enterprise')
    * @param {number} options.width - Canvas width
    * @param {number} options.height - Canvas height
+   * @param {Game} options.game - Reference to the game object
    */
   constructor(options) {
     this.theme = options.theme || "legacy";
     this.width = options.width;
     this.height = options.height;
+    this.game = options.game; // Store reference to the game object
 
     // Level properties
     this.groundY = this.height - 50;
@@ -397,7 +399,7 @@ class Level {
    */
   draw(ctx) {
     this.backgrounds.forEach((bg) => {
-      bg.draw(ctx);
+      bg.drawRepeating(ctx, this.width);
     });
 
     // Draw ground
@@ -472,20 +474,42 @@ class Level {
    * @returns {boolean} - True if deadline caught up with player
    */
   updateDeadline(deltaTime, player) {
-    const baseSpeed = 50; // Base speed of deadline
-    const playerSpeed = player.getSpeed();
+    // Calculate game time in seconds
+    const gameTimeSeconds = this.distance / this.speed;
 
-    // Deadline moves faster when player is slower, creating pressure
-    // Deadline moves slower when player is faster, giving breathing room
-    this.deadlineSpeed = (baseSpeed / playerSpeed) * this.difficulty * 0.7; // Added 0.7 multiplier to slow down deadline
+    // Deadline moves much slower in the first 10 seconds (grace period)
+    let deadlineSpeedMultiplier = 0.05; // Reduced from 0.1 to 0.05
 
-    this.deadlinePosition += this.deadlineSpeed * (deltaTime / 1000);
+    if (gameTimeSeconds >= 10) {
+      // After grace period, deadline speed depends on player speed
+      const playerSpeed = player.getSpeed();
+      const baseSpeed = player.baseSpeed;
 
-    if (this.deadlinePosition >= player.x - 50) {
-      return true; // Deadline caught up with player
+      // If player is moving at base speed, deadline slowly catches up
+      // If player is boosted, deadline falls behind
+      deadlineSpeedMultiplier =
+        (baseSpeed / playerSpeed) * this.difficulty * 0.7; // Added 0.7 multiplier to slow down deadline
+
+      // If player has coffee boost, slow down the deadline significantly
+      if (player.state.hasSpeedBoost) {
+        deadlineSpeedMultiplier *= 0.3; // Reduce deadline speed by 70% when coffee is active
+      }
+
+      // Ensure deadline always moves at least a little bit
+      deadlineSpeedMultiplier = Math.max(0.05, deadlineSpeedMultiplier); // Reduced from 0.1 to 0.05
     }
 
-    return false;
+    // Update deadline position
+    this.deadlinePosition +=
+      this.deadlineSpeed * deadlineSpeedMultiplier * (deltaTime / 1000);
+
+    // Check if deadline is in warning zone
+    const deadlineProximity = this.getDeadlineProximity();
+    this.deadlineWarningActive =
+      deadlineProximity >= this.deadlineWarningThreshold;
+
+    // Check if deadline caught up with player
+    return this.isDeadlineCaught();
   }
 
   /**
@@ -493,80 +517,90 @@ class Level {
    * @param {CanvasRenderingContext2D} ctx - Canvas context
    */
   drawDeadline(ctx) {
-    const x = this.deadlinePosition;
-
-    // Create gradient for deadline
-    const gradient = ctx.createLinearGradient(x - 30, 0, x + 10, 0);
+    // Draw deadline as a vertical red line with gradient
+    const gradient = ctx.createLinearGradient(
+      this.deadlinePosition - 20,
+      0,
+      this.deadlinePosition,
+      0
+    );
     gradient.addColorStop(0, "rgba(255, 0, 0, 0)");
-    gradient.addColorStop(0.7, "rgba(255, 0, 0, 0.7)");
-    gradient.addColorStop(1, "rgba(255, 0, 0, 0.9)");
+    gradient.addColorStop(1, "rgba(255, 0, 0, 0.7)");
 
     ctx.fillStyle = gradient;
-    ctx.fillRect(x - 30, 0, 40, this.height);
+    ctx.fillRect(this.deadlinePosition - 20, 0, 20, this.height);
 
     // Draw deadline line
     ctx.strokeStyle = "rgba(255, 0, 0, 0.9)";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, this.height);
+    ctx.moveTo(this.deadlinePosition, 0);
+    ctx.lineTo(this.deadlinePosition, this.height);
     ctx.stroke();
 
     // Draw deadline text
     ctx.save();
-    ctx.translate(x - 15, this.height / 2);
+    ctx.translate(this.deadlinePosition - 10, this.height / 2);
     ctx.rotate(-Math.PI / 2);
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 14px Arial";
+    ctx.fillStyle = "#ff0000";
+    ctx.font = "bold 16px Arial";
     ctx.fillText("DEADLINE", 0, 0);
     ctx.restore();
   }
 
   /**
-   * Update obstacles and check for collisions with player
-   * Removes obstacles that have moved off-screen
+   * Update obstacles and check for collisions
    * @param {number} deltaTime - Time since last update in ms
    * @param {Player} player - Player object
    */
   updateObstacles(deltaTime, player) {
+    // Update each obstacle
     for (let i = this.obstacles.length - 1; i >= 0; i--) {
       const obstacle = this.obstacles[i];
-      obstacle.update(deltaTime, player.getSpeed());
+      obstacle.update(deltaTime);
 
-      if (obstacle.x + obstacle.width < 0) {
-        this.obstacles.splice(i, 1);
-        continue;
+      // Check for collision with player
+      if (
+        obstacle.isActive &&
+        player.isActive &&
+        !player.state.isCrashed &&
+        player.isCollidingWith(obstacle)
+      ) {
+        // Apply obstacle effect to player
+        obstacle.applyEffect(player);
       }
 
-      if (
-        !player.invincible &&
-        player.collidesWith(obstacle) &&
-        !player.state.isCrashed
-      ) {
-        player.crash();
+      // Remove inactive obstacles
+      if (!obstacle.isActive) {
+        this.obstacles.splice(i, 1);
       }
     }
   }
 
   /**
-   * Update collectibles and check for collisions with player
-   * Removes collectibles that have moved off-screen or been collected
+   * Update collectibles and check for collisions
    * @param {number} deltaTime - Time since last update in ms
    * @param {Player} player - Player object
    */
   updateCollectibles(deltaTime, player) {
+    // Update each collectible
     for (let i = this.collectibles.length - 1; i >= 0; i--) {
       const collectible = this.collectibles[i];
-      collectible.update(deltaTime, player.getSpeed());
+      collectible.update(deltaTime);
 
-      if (collectible.x + collectible.width < 0) {
-        this.collectibles.splice(i, 1);
-        continue;
+      // Check for collision with player
+      if (
+        collectible.isActive &&
+        player.isActive &&
+        !player.state.isCrashed &&
+        player.isCollidingWith(collectible)
+      ) {
+        // Apply collectible effect to player
+        collectible.applyEffect(player);
       }
 
-      if (player.collidesWith(collectible) && !collectible.collected) {
-        collectible.collected = true;
-        this.game.handlePowerUpCollision(collectible);
+      // Remove inactive collectibles
+      if (!collectible.isActive) {
         this.collectibles.splice(i, 1);
       }
     }
